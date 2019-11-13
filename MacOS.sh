@@ -6,12 +6,12 @@ echo "if you already did it then edit this file and uncomment row 6 with a # in 
 exit
 # to automate ADjoin check the variables below and find a solution to get from you AD or just type the name of next object in list "next computer object"
 
-DOMAIN=$(test.com)	    		## Domain
-admin=$(admin)			      	## AD admin
-pass=$(password)		      	## AD admin pass
-adgroup=$(whatevergroup)    ## this is to give admin privileges to a group in the active directory ex: MacAdmins
-ADcomputer=$()			      	## desired computer object name ( this will only be the name of the computer object in Active Directory, hostname is still the same as default)
-OU=$()					          	## desired OU were the computer object is created
+DOMAIN=$(test.com)       ## Domain
+admin=$(admin)           ## AD admin
+pass=$(password)         ## AD admin pass
+adgroup=$(whatevergroup) ## this is to give admin privileges to a group in the active directory ex: MacAdmins
+ADcomputer=$()           ## desired computer object name ( this will only be the name of the computer object in Active Directory, hostname is still the same as default)
+OU=$()                   ## desired OU were the computer object is created
 
 sudo dsconfigad -add $DOMAIN -mobile enable -mobileconfirm disable -localhome enable -protocol smb -shell '/bin/bash' -username $admin -password $pass -groups $adgroup -computer $ADcomputer -ou $OU
 sudo dsconfig -show
