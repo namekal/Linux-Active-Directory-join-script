@@ -1,9 +1,19 @@
 # Linux-Active-Directory-join-script By Pierre 2017-19
 
-Supported OS's: Ubuntu 14-19.10 + mate,Debian ,Cent OS,Rasbian ,Fedora, Linux Mint and Kali
+Supported OS's:
+```
+Ubuntu Desktop/Server 14 - 19.10
+Mate
+Debian
+CentOS
+Raspian
+Fedora
+Linux Mint
+Kali
+```
 
-This is a script for Active Directory join with realmd.
-and is a result of a lot of small upgrades according as needs has emerged.
+This is a script for Active Directory join with `realmd`,
+and is the result of a lot of small upgrades accordingly as needs has emerged.
 
 <p>Also see<a href="https://github.com/PierreGode/Linux-Active-Directory-join-script/wiki"> Wiki</a></p>
 
@@ -22,34 +32,34 @@ as you expect, like: </p>
 <p>built in failcheck</p>
 
 <H4>What is the setup then?</H4>
-computer objct = HOSTNAME .
-sudo group = HOSTNAMEsudoers = ADgroup
+computer object = `$HOSTNAME`
+sudo group = `${HOSTNAME}sudoers` = ADgroup
 
 
-update: Added flag options no minimize the menu and add logging: see sudo sh ADconnection.sh --help
-Usage: sh ADconnection.sh [--help] [-d (ubuntu debug mode)]
+update: Added flag options to minimize the menu and add logging: see `sudo sh ADconnection.sh --help`
+Usage: `sh ADconnection.sh` [--help] [-d (ubuntu debug mode)]
                           [-j admin domain (Simple direct join)
                           [-l (script output to log file)]
                           [-s (Discover domain)]
                           
                           
 
-Usage of the script: sudo sh ADconnection.sh or sudo ./ADconnection.sh
-for ./ADconnection.sh do a sudo chmod +x ADconnection.sh first.
+Usage of the script: `sudo sh ADconnection.sh` or `sudo ./ADconnection.sh`
+(For `./ADconnection.sh` do a `sudo chmod +x ADconnection.sh` first.)
 
-Complete steps
+Complete steps:
 
-1. remember to set a hostname on the client or server, the AD will set computer object itself named after the hostname of the machine = "linuxcomputer" as example
+1. Remember to set a hostname on the client or server, the AD will set computer object itself named after the hostname of the machine = "linuxcomputer" as example
 
-2. At this point you have 2 options. you already have a Group i AD example:"ADMINS" here you have your users with sudo rights. then you need to edit /etc/sudoers.d/sudoers
+2. At this point you have 2 options: You already have a Group in AD example:"ADMINS" here you have your users with sudo rights. then you need to edit /etc/sudoers.d/sudoers
 and add   %ADMINS ALL(ALL:ALL) ALL if you want to give this group sudo rights.
 In this script there is a magic word added for groups in AD and it is sudoers, it always adds sudoers after hostname, like linuxcomputersudoers
 administratoator will always be added as a backdoor for sysadmins.
 
-and also /etc/ssh/login.allow if you have selected this option for security.
+2. 1. and also /etc/ssh/login.allow if you have selected this option for security.
 
-Or if you want to manage sudo users by a new group then create a group name LINUXCOMPUTERsudoers and LINUXCOMPUTER as hostname, they are not related, but Computer object in AD will be created and named after hostname and naming the ADgroup simmilar makes search easier in the future, therefore the script by defaut will add "LINUXCOMPUTERsudoers" as default in sudoers.d/sudoers, in this step you don't need to edit files, the script will allow you to choose if you want users to be sudoers or not and if yes the script will autogenerate "LINUXCOMPUTERsudoers" in sudoers
-.
+2. 2. Or if you want to manage sudo users by a new group then create a group name LINUXCOMPUTERsudoers and LINUXCOMPUTER as hostname, they are not related, but Computer object in AD will be created and named after hostname and naming the ADgroup simmilar makes search easier in the future, therefore the script by defaut will add "LINUXCOMPUTERsudoers" as default in sudoers.d/sudoers, in this step you don't need to edit files, the script will allow you to choose if you want users to be sudoers or not and if yes the script will autogenerate "LINUXCOMPUTERsudoers" in sudoers
+
 3. set hostname on you computer to "linuxcomputer" (hostname and hosts files) and reboot 
 ( in/etc/hosts it should look like 127.0.1.1       LINUXCOMPUTER01       LINUXCOMPUTER01.domain.com also in resolv.conf you should have search domain.com)
 
@@ -80,8 +90,9 @@ added join to ubuntu clients with debug mode.
 debugmode will open 2 terminals and will post information while you run the script.
 (does not work over SSH)
 
-Comming updates: the option to paste a path for a correct OU were the machine will me setup. ( the defoult OU is CN=Computers,DC=domain,DC=com ) (still in progress)
-Comming updates: Option to rejoin ( leave realm and join realm and keep all configuration )
+##TODO 
+- The option to paste a path for a correct OU were the machine will be setup. ( the defoult OU is CN=Computers,DC=domain,DC=com ) (still in progress)
+- Option to rejoin (leave realm and join realm and <ul>keep</ul> all configuration)
 
 
 This will make the cleanest setup possible. no @ in names or in home folder
@@ -123,8 +134,10 @@ you are sudo user if added to sudoes file, but the account is a standard account
 run in terminal: sudo usermod -a -G sudo user
 
 
-Note. make sure dns works so it can properly find ldap server
+Note: Make sure DNS works so it can properly find ldap server.
 If you are using multiple domain servers or have a backup domain server, see example below
+
+```
 [sssd]
 services = nss, pam
 config_file_version = 2
@@ -145,13 +158,14 @@ dyndns_update_ptr = false
 enumerate = true
 subdomain_enumerate = all
 cache_credentials = true
+```
 
 How to change AD password in linux (ubuntu example): open settings, users click on password field, set new password.
 
 How to git?
 
-On linux client install git = sudo apt-get install git -y (or) sudo yum install git
+On linux client install git = `sudo apt-get install git -y` (or) `sudo yum install git`
 
-Clone this repo = sudo git clone https://github.com/PierreGode/Linux-Active-Directory-join-script.git
+Clone this repo = `git clone https://github.com/namekal/Linux-Active-Directory-join-script.git`
 
-To update repo to latest version = in the folder Linux-Active-Directory-join-script/    run: sudo git pull
+To update repo to latest version = in the folder Linux-Active-Directory-join-script/    run: `git pull`
