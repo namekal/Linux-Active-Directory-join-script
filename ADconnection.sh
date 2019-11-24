@@ -1366,8 +1366,8 @@ Reauthenticate() {
         echo ""
         exit
     else
-        LEFT=$(sudo realm discover | grep configured | awk '{print $2}')
-        DOMAIN=$(realm discover | grep -i realm.name | awk '{print $2}')
+        LEFT=$(sudo realm list | grep configured | awk '{print $2}')
+        DOMAIN=$(realm list | grep -i realm.name | awk '{print $2}')
         SSSD=$(sudo grep domain /etc/sssd/sssd.conf | awk '{print $3}' | head -1)
         DOMAINlower=$(echo "$DOMAIN" | tr '[:upper:]' '[:lower:]')
         if [ "$DOMAINlower" = "$SSSD" ]; then
@@ -1426,11 +1426,11 @@ leaves() {
     export HOSTNAME
     myhost=$(hostname | cut -d '.' -f1)
     clear
-    LEFT=$(sudo realm discover | grep configured | awk '{print $2}') </dev/null >/dev/null 2>&1
-    DOMAIN=$(realm discover | grep -i realm.name | awk '{print $2}') </dev/null >/dev/null 2>&1
+    LEFT=$(sudo realm list | grep configured | awk '{print $2}') </dev/null >/dev/null 2>&1
+    DOMAIN=$(realm list | grep -i realm.name | awk '{print $2}') </dev/null >/dev/null 2>&1
     SSSD=$(sudo cat /etc/sssd/sssd.conf | grep domain | awk '{print $3}' | head -1) </dev/null >/dev/null 2>&1
     DOMAINlower=$(echo "$DOMAIN" | tr '[:upper:]' '[:lower:]') </dev/null >/dev/null 2>&1
-    if ! realm discover </dev/null >/dev/null 2>&1; then
+    if ! realm list </dev/null >/dev/null 2>&1; then
         echo ""
         echo "Realm not found, nothing to leave"
         echo ""
@@ -1529,7 +1529,7 @@ MENU_FN() {
     echo "${INTRO_TEXT}   Active directory connection tool             ${END}"
     echo "${INTRO_TEXT}       Created by Pierre Goude                  ${END}"
     echo "${INTRO_TEXT} This script will edit several critical files.. ${END}"
-    echo "${INTRO_TEXT}  DO NOT attempt this without expert knowledge  ${END}"
+    echo "${INTRO_TEXT}  DO NOT attempt this without ${RED_TEXT}expert ${INTRO_TEXT}knowledge  ${END}"
     echo "${NORMAL}                                                    ${END}"
     echo "${MENU}*${NUMBER} 1)${MENU} Join to AD on Linux (Ubuntu/Rasbian/Kali/Fedora/Debian)    ${END}"
     echo "${MENU}*${NUMBER} 2)${MENU} Check for errors    ${END}"
@@ -1651,14 +1651,10 @@ YUM_MENU() {
 PRECHECK_FN() {
     ## Precheck sends yum based OS to an own menu ##
     TheOS=$(hostnamectl | grep -i Operating | awk '{print $3}') </dev/null >/dev/null 2>&1
-    if [ "$TheOS" = "Fedora" ]; then
+    if [ "$TheOS" = "Fedora" ] || [ "$TheOS" = "CentOS" ]; then
         YUM_MENU
     else
-        if [ "$TheOS" = "CentOS" ]; then
-            YUM_MENU
-        else
-            MENU_FN
-        fi
+        MENU_FN
     fi
 }
 ############################## Flags ###############################
@@ -1716,7 +1712,7 @@ while test $# -gt 0; do
                     echo ""
                     exit
                 else
-                    sudo realm discover
+                    sudo realm discover 
                     exit
                 fi
             else
