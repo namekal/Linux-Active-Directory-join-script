@@ -718,7 +718,7 @@ ubuntuServer() {
     sleep 1
     DOMAIN=$(realm discover $dhcpDomain | grep -i realm-name | awk '{print $2}')
     if ! ping -c 1 "$DOMAIN"; then
-        DOMAIN=$(realm discover -v $(cat /etc/resolv.conf |grep -i ^search |sed -r 's/search //'))
+        DOMAIN=$(realm discover -v $(cat /etc/resolv.conf |grep -i ^search |sed -r 's/search //') | grep -i realm-name | awk '{print $2}')
         if ! ping -c 1 "$DOMAIN"; then
             clear
             echo "${NUMBER}I searched for an available domain and found nothing, please type your domain manually below... ${END}"
