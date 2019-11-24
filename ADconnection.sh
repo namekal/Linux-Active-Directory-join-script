@@ -670,7 +670,7 @@ ubuntuDesktop() {
                     echo ""
                     sudo add-apt-repository ppa:aroth/ppa
                     sudo apt-get update
-                    sudo apt-get --only-upgrade install adcli
+                    sudo apt-get -y --only-upgrade install adcli
                     echo ""
                     echo "If the script fails please run sudo apt-get upgrade to update adcli and run the script again"
                     echo ""
@@ -695,7 +695,7 @@ ubuntuDesktop() {
     fi_auth
 }
 
-####################### Setup for Ubuntu server ubuntu 14 #######################################
+####################### Setup for Ubuntu server #######################################
 ubuntuServer() {
     export HOSTNAME
     myhost=$(hostname | cut -d '.' -f1)
