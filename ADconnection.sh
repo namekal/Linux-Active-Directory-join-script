@@ -56,79 +56,79 @@ fi_auth() {
     clear
     read -r -p "${RED_TEXT}Do you wish to enable SSH login.group.allowed${END}${NUMBER}(y/n)?${END}" yn
     case $yn in
-    [Yy]*)
-        sudo echo "Checking if there is any previous configuration"
-        if [ -f /etc/ssh/login.group.allowed ] </dev/null >/dev/null 2>&1; then
-            echo "Files seems already to be modified, skipping..."
-        else
-            echo "NOTICE! /etc/ssh/login.group.allowed will be created. make sure yor local user is in it you you could be banned from login"
-            echo "auth required pam_listfile.so onerr=fail item=group sense=allow file=/etc/ssh/login.group.allowed" | sudo tee -a /etc/pam.d/common-auth
-            sudo touch /etc/ssh/login.group.allowed
-            admins=$(grep home /etc/passwd | grep bash | cut -d ':' -f1)
-            echo ""
-            echo ""
-            read -r -p "Is your current administrator = '$admins' ? (y/n)?" yn
-            case $yn in
-            [Yy]*) sudo echo "$admins" | sudo tee -a /etc/ssh/login.group.allowed ;;
-            [Nn]*)
-                echo "please type name of current administrator"
-                read -r -p MYADMIN
-                sudo echo "$MYADMIN" | sudo tee -a /etc/ssh/login.group.allowed
-                ;;
-            *) echo "Please answer yes or no." ;;
-            esac
-            sudo echo "$NetBios\\$myhost""sudoers""" | sudo tee -a /etc/ssh/login.group.allowed
-            sudo echo "$NetBios\\domain^admins" | sudo tee -a /etc/ssh/login.group.allowed
-            sudo echo "root" | sudo tee -a /etc/ssh/login.group.allowed
-            echo "enabled SSH-allow"
-        fi
+        [Yy]*)
+            sudo echo "Checking if there is any previous configuration"
+            if [ -f /etc/ssh/login.group.allowed ] </dev/null >/dev/null 2>&1; then
+                echo "Files seems already to be modified, skipping..."
+            else
+                echo "NOTICE! /etc/ssh/login.group.allowed will be created. make sure yor local user is in it you you could be banned from login"
+                echo "auth required pam_listfile.so onerr=fail item=group sense=allow file=/etc/ssh/login.group.allowed" | sudo tee -a /etc/pam.d/common-auth
+                sudo touch /etc/ssh/login.group.allowed
+                admins=$(grep home /etc/passwd | grep bash | cut -d ':' -f1)
+                echo ""
+                echo ""
+                read -r -p "Is your current administrator = '$admins' ? (y/n)?" yn
+                case $yn in
+                    [Yy]*) sudo echo "$admins" | sudo tee -a /etc/ssh/login.group.allowed ;;
+                    [Nn]*)
+                        echo "please type name of current administrator"
+                        read -r -p MYADMIN
+                        sudo echo "$MYADMIN" | sudo tee -a /etc/ssh/login.group.allowed
+                    ;;
+                    *) echo "Please answer yes or no." ;;
+                esac
+                sudo echo "$NetBios\\$myhost""sudoers""" | sudo tee -a /etc/ssh/login.group.allowed
+                sudo echo "$NetBios\\domain^admins" | sudo tee -a /etc/ssh/login.group.allowed
+                sudo echo "root" | sudo tee -a /etc/ssh/login.group.allowed
+                echo "enabled SSH-allow"
+            fi
         ;;
-    [Nn]*)
-        echo "Disabled SSH login.group.allowed"
-        states1="12"
+        [Nn]*)
+            echo "Disabled SSH login.group.allowed"
+            states1="12"
         ;;
-    *) echo "Please answer yes or no." ;;
+        *) echo "Please answer yes or no." ;;
     esac
     echo ""
     echo "-------------------------------------------------------------------------------------------"
     echo ""
     read -r -p "${RED_TEXT}Do you wish to give users on this machine sudo rights?${END}${NUMBER}(y/n)?${END}" yn
     case $yn in
-    [Yy]*)
-        sudo echo "Checking if there is any previous configuration"
-        if [ -f /etc/sudoers.d/sudoers ] </dev/null >/dev/null 2>&1; then
-            echo ""
-            echo "The Sudoers file seems already to be modified, skipping..."
-            echo ""
-        else
-            read -r -p "${RED_TEXT}Do you wish to DISABLE password prompt for users in terminal?${END}${NUMBER}(y/n)?${END}" yn
-            case $yn in
-            [Yy]*)
-                sudo echo "administrator ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/sudoers
-                sudo echo "%$myhost""sudoers ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/sudoers
-                sudo echo "%DOMAIN\ admins ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/domain_admins
-                #sudo realm permit --groups "$myhost""sudoers"
-                ;;
-
-            [Nn]*)
-                sudo echo "administrator ALL=(ALL:ALL) ALL" | sudo tee -a /etc/sudoers.d/sudoers
-                sudo echo "%$myhost""sudoers ALL=(ALL:ALL) ALL" | sudo tee -a /etc/sudoers.d/sudoers
-                sudo echo "%DOMAIN\ admins ALL=(ALL:ALL) ALL" | sudo tee -a /etc/sudoers.d/domain_admins
-                #sudo realm permit --groups "$myhost""sudoers"
-                ;;
-            *) echo "Please answer yes or no." ;;
-            esac
-        fi
+        [Yy]*)
+            sudo echo "Checking if there is any previous configuration"
+            if [ -f /etc/sudoers.d/sudoers ] </dev/null >/dev/null 2>&1; then
+                echo ""
+                echo "The Sudoers file seems already to be modified, skipping..."
+                echo ""
+            else
+                read -r -p "${RED_TEXT}Do you wish to DISABLE password prompt for users in terminal?${END}${NUMBER}(y/n)?${END}" yn
+                case $yn in
+                    [Yy]*)
+                        sudo echo "administrator ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/sudoers
+                        sudo echo "%$myhost""sudoers ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/sudoers
+                        sudo echo "%DOMAIN\ admins ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/domain_admins
+                        #sudo realm permit --groups "$myhost""sudoers"
+                    ;;
+                    
+                    [Nn]*)
+                        sudo echo "administrator ALL=(ALL:ALL) ALL" | sudo tee -a /etc/sudoers.d/sudoers
+                        sudo echo "%$myhost""sudoers ALL=(ALL:ALL) ALL" | sudo tee -a /etc/sudoers.d/sudoers
+                        sudo echo "%DOMAIN\ admins ALL=(ALL:ALL) ALL" | sudo tee -a /etc/sudoers.d/domain_admins
+                        #sudo realm permit --groups "$myhost""sudoers"
+                    ;;
+                    *) echo "Please answer yes or no." ;;
+                esac
+            fi
         ;;
-    [Nn]*)
-        sudo echo "administrator ALL=(ALL:ALL) ALL" | sudo tee -a /etc/sudoers.d/sudoers
-        echo "Disabled sudo rights for users on this machine"
-        echo ""
-        echo ""
-        states="12"
+        [Nn]*)
+            sudo echo "administrator ALL=(ALL:ALL) ALL" | sudo tee -a /etc/sudoers.d/sudoers
+            echo "Disabled sudo rights for users on this machine"
+            echo ""
+            echo ""
+            states="12"
         ;;
-    *)
-        echo "Please answer yes or no."
+        *)
+            echo "Please answer yes or no."
         ;;
     esac
     homedir=$(grep homedir /etc/pam.d/common-session | grep 0022 | cut -d '=' -f3)
@@ -181,7 +181,7 @@ fi_auth() {
     #ad_enable_gc = False
     entry_cache_nowait_percentage = 75" | sudo tee -a /etc/sssd/sssd.conf
     clear
-
+    
     ################################# Check #######################################
     if ! sudo service sssd restart; then
         echo "sssd config.. ${RED_TEXT}FAIL${END}"
@@ -268,77 +268,77 @@ fi_auth_yum() {
     clear
     read -r -p 'Do you wish to enable SSH login.group.allowed (y/n)?' yn
     case $yn in
-    [Yy]*)
-        sudo echo "Checking if there is any previous configuration"
-        if [ -f /etc/ssh/login.group.allowed ] </dev/null >/dev/null 2>&1; then
-            echo "Files seems already to be modified, skipping..."
-        else
-            echo "NOTICE! /etc/ssh/login.group.allowed will be created. make sure yor local user is in it you you could be banned from login"
-            echo "auth required pam_listfile.so onerr=fail item=group sense=allow file=/etc/ssh/login.group.allowed" | sudo tee -a /etc/pam.d/sshd
-            sudo touch /etc/ssh/login.group.allowed
-            admins=$(grep home /etc/passwd | grep bash | cut -d ':' -f1)
-            echo ""
-            echo ""
-            read -r -p "Is your current administrator = $admins ? (y/n)?" yn
-            case $yn in
-            [Yy]*) sudo echo "$admins" | sudo tee -a /etc/ssh/login.group.allowed ;;
-            [Nn]*)
-                echo "please type name of current administrator"
-                read -r -p MYADMIN
-                sudo echo "$MYADMIN" | sudo tee -a /etc/ssh/login.group.allowed
-                ;;
-            *) echo "Please answer yes or no." ;;
-            esac
-            sudo echo "$myhost""sudoers" | sudo tee -a /etc/ssh/login.group.allowed
-            sudo echo "domain^admins" | sudo tee -a /etc/ssh/login.group.allowed
-            sudo echo "root" | sudo tee -a /etc/ssh/login.group.allowed
-            echo "enabled SSH-allow"
-        fi
+        [Yy]*)
+            sudo echo "Checking if there is any previous configuration"
+            if [ -f /etc/ssh/login.group.allowed ] </dev/null >/dev/null 2>&1; then
+                echo "Files seems already to be modified, skipping..."
+            else
+                echo "NOTICE! /etc/ssh/login.group.allowed will be created. make sure yor local user is in it you you could be banned from login"
+                echo "auth required pam_listfile.so onerr=fail item=group sense=allow file=/etc/ssh/login.group.allowed" | sudo tee -a /etc/pam.d/sshd
+                sudo touch /etc/ssh/login.group.allowed
+                admins=$(grep home /etc/passwd | grep bash | cut -d ':' -f1)
+                echo ""
+                echo ""
+                read -r -p "Is your current administrator = $admins ? (y/n)?" yn
+                case $yn in
+                    [Yy]*) sudo echo "$admins" | sudo tee -a /etc/ssh/login.group.allowed ;;
+                    [Nn]*)
+                        echo "please type name of current administrator"
+                        read -r -p MYADMIN
+                        sudo echo "$MYADMIN" | sudo tee -a /etc/ssh/login.group.allowed
+                    ;;
+                    *) echo "Please answer yes or no." ;;
+                esac
+                sudo echo "$myhost""sudoers" | sudo tee -a /etc/ssh/login.group.allowed
+                sudo echo "domain^admins" | sudo tee -a /etc/ssh/login.group.allowed
+                sudo echo "root" | sudo tee -a /etc/ssh/login.group.allowed
+                echo "enabled SSH-allow"
+            fi
         ;;
-    [Nn]*)
-        echo "Disabled SSH login.group.allowed"
-        states1="12"
+        [Nn]*)
+            echo "Disabled SSH login.group.allowed"
+            states1="12"
         ;;
-    *) echo "Please answer yes or no." ;;
+        *) echo "Please answer yes or no." ;;
     esac
     echo ""
     echo "-------------------------------------------------------------------------------------------"
     echo ""
     read -r -p 'Do you wish to give users on this machine sudo rights?(y/n)?' yn
     case $yn in
-    [Yy]*)
-        sudo echo "Checking if there is any previous configuration"
-        if [ -f /etc/sudoers.d/sudoers ] </dev/null >/dev/null 2>&1; then
-            echo ""
-            echo "The Sudoers file seems already to be modified, skipping..."
-            echo ""
-        else
-            read -r -p 'Do you wish to DISABLE password promt for users in terminal? (y/n)?' yn
-            case $yn in
-            [Yy]*)
-                sudo echo "administrator ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/sudoers
-                sudo echo "%$myhost""sudoers ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/sudoers
-                sudo echo "%DOMAIN\ admins ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/domain_admins
-                #sudo realm permit --groups "$myhost""sudoers"
-                ;;
-
-            [Nn]*)
-                sudo echo "administrator ALL=(ALL:ALL) ALL" | sudo tee -a /etc/sudoers.d/sudoers
-                sudo echo "%$myhost""sudoers ALL=(ALL:ALL) ALL" | sudo tee -a /etc/sudoers.d/sudoers
-                sudo echo "%DOMAIN\ admins ALL=(ALL:ALL) ALL" | sudo tee -a /etc/sudoers.d/domain_admins
-                #sudo realm permit --groups "$myhost""sudoers"
-                ;;
-            *) echo "Please answer yes or no." ;;
-            esac
-        fi
+        [Yy]*)
+            sudo echo "Checking if there is any previous configuration"
+            if [ -f /etc/sudoers.d/sudoers ] </dev/null >/dev/null 2>&1; then
+                echo ""
+                echo "The Sudoers file seems already to be modified, skipping..."
+                echo ""
+            else
+                read -r -p 'Do you wish to DISABLE password promt for users in terminal? (y/n)?' yn
+                case $yn in
+                    [Yy]*)
+                        sudo echo "administrator ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/sudoers
+                        sudo echo "%$myhost""sudoers ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/sudoers
+                        sudo echo "%DOMAIN\ admins ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/domain_admins
+                        #sudo realm permit --groups "$myhost""sudoers"
+                    ;;
+                    
+                    [Nn]*)
+                        sudo echo "administrator ALL=(ALL:ALL) ALL" | sudo tee -a /etc/sudoers.d/sudoers
+                        sudo echo "%$myhost""sudoers ALL=(ALL:ALL) ALL" | sudo tee -a /etc/sudoers.d/sudoers
+                        sudo echo "%DOMAIN\ admins ALL=(ALL:ALL) ALL" | sudo tee -a /etc/sudoers.d/domain_admins
+                        #sudo realm permit --groups "$myhost""sudoers"
+                    ;;
+                    *) echo "Please answer yes or no." ;;
+                esac
+            fi
         ;;
-    [Nn]*)
-        echo "Disabled sudo rights for users on this machine"
-        echo ""
-        echo ""
-        states="12"
+        [Nn]*)
+            echo "Disabled sudo rights for users on this machine"
+            echo ""
+            echo ""
+            states="12"
         ;;
-    *) echo 'Please answer yes or no.' ;;
+        *) echo 'Please answer yes or no.' ;;
     esac
     homedir=$(grep homedir /etc/pam.d/common-session | grep 0022 | cut -d '=' -f3)
     if [ "$homedir" = "0022" ]; then
@@ -384,7 +384,7 @@ fi_auth_yum() {
     #ldap_group_member = uniquemember
     #ad_enable_gc = False
     entry_cache_nowait_percentage = 75" | sudo tee -a /etc/sssd/sssd.conf
-
+    
     ####################### Check #########################
     if ! sudo service sssd restart; then
         echo "SSSD failed relading, please see journalctl -xe"
@@ -465,63 +465,63 @@ linuxclient() {
     MintOS=$(hostnamectl | grep -i Operating | awk '{print $4}') </dev/null >/dev/null 2>&1
     rasp=$(lsb_release -a | grep -i Distributor | awk '{print $3}') </dev/null >/dev/null 2>&1
     kalilinux=$(lsb_release -a | grep -i Distributor | awk '{print $3}') </dev/null >/dev/null 2>&1
-
+    
     #### OS detection ####
     case $TheOS in
-    Fedora)
-        echo "${INTRO_TEXT}Fedora detected${END}"
-        Fedora_fn
+        Fedora)
+            echo "${INTRO_TEXT}Fedora detected${END}"
+            Fedora_fn
         ;;
-    CentOS)
-        echo "${INTRO_TEXT}Cent OS detected${END}"
-        CentOS
+        CentOS)
+            echo "${INTRO_TEXT}Cent OS detected${END}"
+            CentOS
         ;;
-    Debian)
-        echo "${INTRO_TEXT}Debian detected${END}"
-        debianclient
+        Debian)
+            echo "${INTRO_TEXT}Debian detected${END}"
+            debianclient
         ;;
-    Ubuntu)
-        echo "${INTRO_TEXT}Ubuntu detected${END}"
-        echo ""
-        echo "Checking if it is a Desktop or server"
-        desktop=$(sudo apt list --installed | grep -i desktop | grep -i ubuntu | cut -d '-' -f1 | grep -i desktop | head -1 | awk '{print$1}')
-        if [ "$desktop" = "desktop" ] || [ -n "$XDG_CURRENT_DESKTOP" ] || [ -n "$XDG_DATA_DIRS" ]; then ### </dev/null >/dev/null 2>&1
-            echo "Ubuntu Desktop environment detected"
-            [[ -n $XDG_CURRENT_DESKTOP ]] && printf 'Desktop: %s\n' "$XDG_CURRENT_DESKTOP"
-            [[ -n $GDMSESSION ]] && printf 'Session: %s\n' "$GDMSESSION"
-            ubuntuDesktop
-        else
-            echo " This seems to be a server, swithching to server mode"
-            ubuntuServer
-        fi
+        Ubuntu)
+            echo "${INTRO_TEXT}Ubuntu detected${END}"
+            echo ""
+            echo "Checking if it is a Desktop or server"
+            desktop=$(sudo apt list --installed | grep -i desktop | grep -i ubuntu | cut -d '-' -f1 | grep -i desktop | head -1 | awk '{print$1}')
+            if [ "$desktop" = "desktop" ] || [ -n "$XDG_CURRENT_DESKTOP" ] || [ -n "$XDG_DATA_DIRS" ]; then ### </dev/null >/dev/null 2>&1
+                echo "Ubuntu Desktop environment detected"
+                [[ -n $XDG_CURRENT_DESKTOP ]] && printf 'Desktop: %s\n' "$XDG_CURRENT_DESKTOP"
+                [[ -n $GDMSESSION ]] && printf 'Session: %s\n' "$GDMSESSION"
+                ubuntuDesktop
+            else
+                echo " This seems to be a server, swithching to server mode"
+                ubuntuServer
+            fi
         ;;
-    *) ## Check for Raspbian/Kali/Mint until unknown.
-        case $rasp in
-        Raspbian)
-            echo "${INTRO_TEXT}Detecting Raspberry Pi${END}"
-            raspberry
-            ;;
-        *)
-            case $kalilinux in
-            Kali)
-                echo "${INTRO_TEXT}Detecting Kali linux${END}"
-                kalijoin
+        *) ## Check for Raspbian/Kali/Mint until unknown.
+            case $rasp in
+                Raspbian)
+                    echo "${INTRO_TEXT}Detecting Raspberry Pi${END}"
+                    raspberry
                 ;;
-            *)
-                case $MintOS in
-                Mint)
-                    echo "${INTRO_TEXT}Detecting Linux Mint${END}"
-                    LinuxMint
-                    ;;
-                *) ## End of checks, Incompatible system.
-                    echo "${RED_TEXT}No compatible System found${END}"
-                    echo "Exiting..."
-                    exit
-                    ;;
-                esac
+                *)
+                    case $kalilinux in
+                        Kali)
+                            echo "${INTRO_TEXT}Detecting Kali linux${END}"
+                            kalijoin
+                        ;;
+                        *)
+                            case $MintOS in
+                                Mint)
+                                    echo "${INTRO_TEXT}Detecting Linux Mint${END}"
+                                    LinuxMint
+                                ;;
+                                *) ## End of checks, Incompatible system.
+                                    echo "${RED_TEXT}No compatible System found${END}"
+                                    echo "Exiting..."
+                                    exit
+                                ;;
+                            esac
+                        ;;
+                    esac
                 ;;
-            esac
-            ;;
         esac ;;
     esac
     #### OS detection ####  ----OLD
@@ -617,13 +617,13 @@ ubuntuDesktop() {
         echo "${NUMBER}I searched for an available domain and found ${MENU}>>> $DOMAIN  <<<${END}${END}"
         read -r -p "Do you wish to use it (y/n)?" yn
         case $yn in
-        [Yy]*) echo "" ;;
-
-        [Nn]*)
-            echo "Please enter the domain you wish to join:"
-            read -r DOMAIN
+            [Yy]*) echo "" ;;
+            
+            [Nn]*)
+                echo "Please enter the domain you wish to join:"
+                read -r DOMAIN
             ;;
-        *) echo 'Please answer yes or no.' ;;
+            *) echo 'Please answer yes or no.' ;;
         esac
     fi
     NetBios=$(echo "$DOMAIN" | cut -d '.' -f1)
@@ -726,13 +726,13 @@ ubuntuServer() {
         echo "${NUMBER}I searched for an available domain and found ${MENU}>>> $DOMAIN  <<<${END}${END}"
         read -r -p "Do you wish to use it (y/n)?" yn
         case $yn in
-        [Yy]*) echo "${INTRO_TEXT}Please log in with domain admin to $DOMAIN to connect${END}" ;;
-
-        [Nn]*)
-            echo "Please enter the domain you wish to join:"
-            read -r DOMAIN
+            [Yy]*) echo "${INTRO_TEXT}Please log in with domain admin to $DOMAIN to connect${END}" ;;
+            
+            [Nn]*)
+                echo "Please enter the domain you wish to join:"
+                read -r DOMAIN
             ;;
-        *) echo 'Please answer yes or no.' ;;
+            *) echo 'Please answer yes or no.' ;;
         esac
     fi
     sudo echo "${INTRO_TEXT}Realm= $DOMAIN${END}"
@@ -759,67 +759,67 @@ ubuntuServer() {
     clear
     read -r -p "${RED_TEXT}Do you wish to enable SSH login.group.allowed${END}${NUMBER}(y/n)?${END}" yn
     case $yn in
-    [Yy]*)
-        sudo echo "Checking if there is any previous configuration"
-        if [ -f /etc/ssh/login.group.allowed ] </dev/null >/dev/null 2>&1; then
-            echo "Files seems already to be modified, skipping..."
-        else
-            echo "NOTICE! /etc/ssh/login.group.allowed will be created. make sure your local user is in it or you could be banned from login"
-            echo "auth required pam_listfile.so onerr=fail item=group sense=allow file=/etc/ssh/login.group.allowed" | sudo tee -a /etc/pam.d/common-auth
-            sudo touch /etc/ssh/login.group.allowed
-            admins=$(grep home /etc/passwd | grep bash | cut -d ':' -f1)
-            echo ""
-            echo ""
-            read -r -p "Is your current administrator = $admins ? (y/n)?" yn
-            case $yn in
-            [Yy]*) sudo echo "$admins" | sudo tee -a /etc/ssh/login.group.allowed ;;
-            [Nn]*)
-                echo "please type name of current administrator"
-                read -r -p MYADMIN
-                sudo echo "$MYADMIN" | sudo tee -a /etc/ssh/login.group.allowed
-                ;;
-            *) echo "Please answer yes or no." ;;
-            esac
-            sudo echo "$Mysrvgroup" | sudo tee -a /etc/ssh/login.group.allowed
-            sudo echo "$NetBios\\$myhost""sudoers""" | sudo tee -a /etc/ssh/login.group.allowed
-            sudo echo "$NetBios\\domain^admins" | sudo tee -a /etc/ssh/login.group.allowed
-            sudo echo "root" | sudo tee -a /etc/ssh/login.group.allowed
-            echo "enabled SSH-allow"
-        fi
+        [Yy]*)
+            sudo echo "Checking if there is any previous configuration"
+            if [ -f /etc/ssh/login.group.allowed ] </dev/null >/dev/null 2>&1; then
+                echo "Files seems already to be modified, skipping..."
+            else
+                echo "NOTICE! /etc/ssh/login.group.allowed will be created. make sure your local user is in it or you could be banned from login"
+                echo "auth required pam_listfile.so onerr=fail item=group sense=allow file=/etc/ssh/login.group.allowed" | sudo tee -a /etc/pam.d/common-auth
+                sudo touch /etc/ssh/login.group.allowed
+                admins=$(grep home /etc/passwd | grep bash | cut -d ':' -f1)
+                echo ""
+                echo ""
+                read -r -p "Is your current administrator = $admins ? (y/n)?" yn
+                case $yn in
+                    [Yy]*) sudo echo "$admins" | sudo tee -a /etc/ssh/login.group.allowed ;;
+                    [Nn]*)
+                        echo "please type name of current administrator"
+                        read -r -p MYADMIN
+                        sudo echo "$MYADMIN" | sudo tee -a /etc/ssh/login.group.allowed
+                    ;;
+                    *) echo "Please answer yes or no." ;;
+                esac
+                sudo echo "$Mysrvgroup" | sudo tee -a /etc/ssh/login.group.allowed
+                sudo echo "$NetBios\\$myhost""sudoers""" | sudo tee -a /etc/ssh/login.group.allowed
+                sudo echo "$NetBios\\domain^admins" | sudo tee -a /etc/ssh/login.group.allowed
+                sudo echo "root" | sudo tee -a /etc/ssh/login.group.allowed
+                echo "enabled SSH-allow"
+            fi
         ;;
-    [Nn]*)
-        echo "Disabled SSH login.group.allowed"
-        states1="12"
+        [Nn]*)
+            echo "Disabled SSH login.group.allowed"
+            states1="12"
         ;;
-    *) echo "Please answer yes or no." ;;
+        *) echo "Please answer yes or no." ;;
     esac
     echo ""
     echo "-------------------------------------------------------------------------------------------"
     echo ""
     read -r -p "${RED_TEXT}Do you wish to give users on this machine sudo rights?${END}${NUMBER}(y/n)?${END}" yn
     case $yn in
-    [Yy]*)
-        sudo echo "Checking if there is any previous configuration"
-        if [ -f /etc/sudoers.d/sudoers ] </dev/null >/dev/null 2>&1; then
-            echo ""
-            echo "Sudoers file seems already to be modified, skipping..."
-            echo ""
-        else
-            sudo echo "administrator ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/sudoers
-            sudo echo "%$Mysrvgroup""sudoers ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/sudoers
-            sudo echo "%$myhost""sudoers ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/sudoers
-            sudo echo "%domain\ users ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/sudoers
-            sudo echo "%DOMAIN\ admins ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/domain_admins
-        #sudo realm permit --groups "$myhost""sudoers"
-        fi
+        [Yy]*)
+            sudo echo "Checking if there is any previous configuration"
+            if [ -f /etc/sudoers.d/sudoers ] </dev/null >/dev/null 2>&1; then
+                echo ""
+                echo "Sudoers file seems already to be modified, skipping..."
+                echo ""
+            else
+                sudo echo "administrator ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/sudoers
+                sudo echo "%$Mysrvgroup""sudoers ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/sudoers
+                sudo echo "%$myhost""sudoers ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/sudoers
+                sudo echo "%domain\ users ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/sudoers
+                sudo echo "%DOMAIN\ admins ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/domain_admins
+                #sudo realm permit --groups "$myhost""sudoers"
+            fi
         ;;
-    [Nn]*)
-        echo "Disabled sudo rights for users on this machine"
-        echo ""
-        echo ""
-        states="12"
+        [Nn]*)
+            echo "Disabled sudo rights for users on this machine"
+            echo ""
+            echo ""
+            states="12"
         ;;
-    *) echo 'Please answer yes or no.' ;;
+        *) echo 'Please answer yes or no.' ;;
     esac
     ##### Desktop specific??
     echo "session required pam_mkhomedir.so skel=/etc/skel/ umask=0022" | sudo tee -a /etc/pam.d/common-session
@@ -918,13 +918,13 @@ kalijoin() {
         echo "${NUMBER}I searched for an available domain and found $DOMAIN ${END}"
         read -r -p "Do you wish to use it (y/n)?" yn
         case $yn in
-        [Yy]*) echo "${INTRO_TEXT}Please log in with domain admin to $DOMAIN to connect${END}" ;;
-
-        [Nn]*)
-            echo "Please enter the domain you wish to join:"
-            read -r DOMAIN
+            [Yy]*) echo "${INTRO_TEXT}Please log in with domain admin to $DOMAIN to connect${END}" ;;
+            
+            [Nn]*)
+                echo "Please enter the domain you wish to join:"
+                read -r DOMAIN
             ;;
-        *) echo 'Please answer yes or no.' ;;
+            *) echo 'Please answer yes or no.' ;;
         esac
     fi
     NetBios=$(echo "$DOMAIN" | cut -d '.' -f1)
@@ -988,13 +988,13 @@ debianclient() {
         echo "${NUMBER}I searched for an available domain and found $DOMAIN ${END}"
         read -r -p "Do you wish to use it (y/n)?" yn
         case $yn in
-        [Yy]*) echo "${INTRO_TEXT}Please log in with domain admin to $DOMAIN to connect${END}" ;;
-
-        [Nn]*)
-            echo "Please enter the domain you wish to join:"
-            read -r DOMAIN
+            [Yy]*) echo "${INTRO_TEXT}Please log in with domain admin to $DOMAIN to connect${END}" ;;
+            
+            [Nn]*)
+                echo "Please enter the domain you wish to join:"
+                read -r DOMAIN
             ;;
-        *) echo 'Please answer yes or no.' ;;
+            *) echo 'Please answer yes or no.' ;;
         esac
     fi
     NetBios=$(echo "$DOMAIN" | cut -d '.' -f1)
@@ -1032,18 +1032,18 @@ CentOS() {
             echo "I searched for an available domain and found >>> $DOMAIN  <<<"
             read -r -p "Do you wish to use it (y/n)?" yn
             case $yn in
-            [Yy]*)
-                echo "Please log in with domain admin to $DOMAIN to connect"
-                sudo echo "Please enter AD admin user:"
-                read -r ADMIN
+                [Yy]*)
+                    echo "Please log in with domain admin to $DOMAIN to connect"
+                    sudo echo "Please enter AD admin user:"
+                    read -r ADMIN
                 ;;
-            [Nn]*)
-                echo "Please enter the domain you wish to join:"
-                read -r DOMAIN
-                sudo echo "Please enter AD admin user:"
-                read -r ADMIN
+                [Nn]*)
+                    echo "Please enter the domain you wish to join:"
+                    read -r DOMAIN
+                    sudo echo "Please enter AD admin user:"
+                    read -r ADMIN
                 ;;
-            *) echo 'Please answer yes or no.' ;;
+                *) echo 'Please answer yes or no.' ;;
             esac
         fi
     else
@@ -1122,13 +1122,13 @@ Fedora_fn() {
         echo "I searched for an available domain and found >>> $DOMAIN  <<<"
         read -r -p "Do you wish to use it (y/n)?" yn
         case $yn in
-        [Yy]*) echo "Please log in with domain admin to $DOMAIN to connect" ;;
-
-        [Nn]*)
-            echo "Please enter the domain you wish to join:"
-            read -r DOMAIN
+            [Yy]*) echo "Please log in with domain admin to $DOMAIN to connect" ;;
+            
+            [Nn]*)
+                echo "Please enter the domain you wish to join:"
+                read -r DOMAIN
             ;;
-        *) echo 'Please answer yes or no.' ;;
+            *) echo 'Please answer yes or no.' ;;
         esac
     fi
     clear
@@ -1163,13 +1163,13 @@ LinuxMint() {
         echo "${NUMBER}I searched for an available domain and found ${MENU}>>> $DOMAIN  <<<${END}${END}"
         read -r -p "Do you wish to use it (y/n)?" yn
         case $yn in
-        [Yy]*) echo "" ;;
-
-        [Nn]*)
-            echo "Please enter the domain you wish to join:"
-            read -r DOMAIN
+            [Yy]*) echo "" ;;
+            
+            [Nn]*)
+                echo "Please enter the domain you wish to join:"
+                read -r DOMAIN
             ;;
-        *) echo 'Please answer yes or no.' ;;
+            *) echo 'Please answer yes or no.' ;;
         esac
     fi
     clear
@@ -1378,24 +1378,12 @@ Reauthenticate() {
         fi
         read -r -p "Do you really want to leave the domain: $DOMAIN (y/n)?" yn
         case $yn in
-        [Yy]*)
-            echo "Listing domain"
-            sudo realm discover "$DOMAIN"
-            sudo realm leave "$DOMAIN"
-            LEFT=$(sudo realm discover | grep configured | awk '{print $2}')
-            if [ "$LEFT" = "no" ]; then
-                echo ""
-                sudo echo "" | sudo tee /etc/sssd/sssd.conf
-                echo "$DOMAIN has been left"
-                echo ""
-                notify-send ADconnection "Left $DOMAIN "
-                linuxclient
-            else
-                echo "something went wrong, try to leave manually"
-                read -r DOMAIN
+            [Yy]*)
+                echo "Listing domain"
+                sudo realm discover "$DOMAIN"
                 sudo realm leave "$DOMAIN"
-                left=$(sudo realm discover | grep configured | awk '{print $2}')
-                if [ "$left" = "no" ]; then
+                LEFT=$(sudo realm discover | grep configured | awk '{print $2}')
+                if [ "$LEFT" = "no" ]; then
                     echo ""
                     sudo echo "" | sudo tee /etc/sssd/sssd.conf
                     echo "$DOMAIN has been left"
@@ -1403,15 +1391,27 @@ Reauthenticate() {
                     notify-send ADconnection "Left $DOMAIN "
                     linuxclient
                 else
-                    echo "something went wrong"
+                    echo "something went wrong, try to leave manually"
+                    read -r DOMAIN
+                    sudo realm leave "$DOMAIN"
+                    left=$(sudo realm discover | grep configured | awk '{print $2}')
+                    if [ "$left" = "no" ]; then
+                        echo ""
+                        sudo echo "" | sudo tee /etc/sssd/sssd.conf
+                        echo "$DOMAIN has been left"
+                        echo ""
+                        notify-send ADconnection "Left $DOMAIN "
+                        linuxclient
+                    else
+                        echo "something went wrong"
+                    fi
                 fi
-            fi
             ;;
-        [Nn]*)
-            echo "Bye"
-            exit
+            [Nn]*)
+                echo "Bye"
+                exit
             ;;
-        *) echo 'Please answer yes or no.' ;;
+            *) echo 'Please answer yes or no.' ;;
         esac
         exit
     fi
@@ -1443,40 +1443,40 @@ leaves() {
         fi
         read -r -p "Do you really want to leave the domain: $DOMAIN (y/n)?" yn
         case $yn in
-        [Yy]*)
-            echo "Listing domain"
-            sudo realm discover "$DOMAIN"
-            sudo realm leave "$DOMAIN"
-            LEFT=$(sudo realm discover | grep configured | awk '{print $2}')
-            if [ "$LEFT" = "no" ]; then
-                echo ""
-                sudo echo "" | sudo tee /etc/sssd/sssd.conf
-                echo "$DOMAIN has been left"
-                echo ""
-                notify-send ADconnection "Left $DOMAIN "
-            else
-                echo "something went wrong, try to leave manually"
-                echo ""
-                echo "Please type domain you wish to leave"
-                read -r DOMAIN
+            [Yy]*)
+                echo "Listing domain"
+                sudo realm discover "$DOMAIN"
                 sudo realm leave "$DOMAIN"
-                left=$(sudo realm discover | grep configured | awk '{print $2}')
-                if [ "$left" = "no" ]; then
+                LEFT=$(sudo realm discover | grep configured | awk '{print $2}')
+                if [ "$LEFT" = "no" ]; then
                     echo ""
                     sudo echo "" | sudo tee /etc/sssd/sssd.conf
                     echo "$DOMAIN has been left"
                     echo ""
                     notify-send ADconnection "Left $DOMAIN "
                 else
-                    echo "something went wrong"
+                    echo "something went wrong, try to leave manually"
+                    echo ""
+                    echo "Please type domain you wish to leave"
+                    read -r DOMAIN
+                    sudo realm leave "$DOMAIN"
+                    left=$(sudo realm discover | grep configured | awk '{print $2}')
+                    if [ "$left" = "no" ]; then
+                        echo ""
+                        sudo echo "" | sudo tee /etc/sssd/sssd.conf
+                        echo "$DOMAIN has been left"
+                        echo ""
+                        notify-send ADconnection "Left $DOMAIN "
+                    else
+                        echo "something went wrong"
+                    fi
                 fi
-            fi
             ;;
-        [Nn]*)
-            echo "Bye"
-            exit
+            [Nn]*)
+                echo "Bye"
+                exit
             ;;
-        *) echo 'Please answer yes or no.' ;;
+            *) echo 'Please answer yes or no.' ;;
         esac
         exit
     fi
@@ -1540,42 +1540,42 @@ MENU_FN() {
             exit
         else
             case $opt in
-            1)
-                clear
-                echo "Installing on Linux Client/Server"
-                linuxclient
+                1)
+                    clear
+                    echo "Installing on Linux Client/Server"
+                    linuxclient
                 ;;
-
-            2)
-                clear
-                echo "Check for errors"
-                failcheck
+                
+                2)
+                    clear
+                    echo "Check for errors"
+                    failcheck
                 ;;
-            3)
-                clear
-                echo "Check in Ldap"
-                ldaplook
+                3)
+                    clear
+                    echo "Check in Ldap"
+                    ldaplook
                 ;;
-            4)
-                clear
-                echo "Rejoin to AD"
-                Reauthenticate
+                4)
+                    clear
+                    echo "Rejoin to AD"
+                    Reauthenticate
                 ;;
-            5)
-                clear
-                echo "Leave domain"
-                leaves
+                5)
+                    clear
+                    echo "Leave domain"
+                    leaves
                 ;;
-            x)
-                exit
+                x)
+                    exit
                 ;;
-            '\n')
-                exit
+                '\n')
+                    exit
                 ;;
-            *)
-                clear
-                opt "Pick an option from the menu"
-                MENU_FN
+                *)
+                    clear
+                    opt "Pick an option from the menu"
+                    MENU_FN
                 ;;
             esac
         fi
@@ -1603,41 +1603,41 @@ YUM_MENU() {
             exit
         else
             case $opt in
-            1)
-                clear
-                echo "Installing on Linux Client/Server"
-                linuxclient
+                1)
+                    clear
+                    echo "Installing on Linux Client/Server"
+                    linuxclient
                 ;;
-            2)
-                clear
-                echo "Check for errors"
-                failcheck_yum
+                2)
+                    clear
+                    echo "Check for errors"
+                    failcheck_yum
                 ;;
-            3)
-                clear
-                echo "Check in Ldap"
-                ldaplook
+                3)
+                    clear
+                    echo "Check in Ldap"
+                    ldaplook
                 ;;
-            4)
-                clear
-                echo "Rejoin to AD"
-                Reauthenticate
+                4)
+                    clear
+                    echo "Rejoin to AD"
+                    Reauthenticate
                 ;;
-            5)
-                clear
-                echo "Leave domain"
-                leave
+                5)
+                    clear
+                    echo "Leave domain"
+                    leave
                 ;;
-            x)
-                exit
+                x)
+                    exit
                 ;;
-            '\n')
-                exit
+                '\n')
+                    exit
                 ;;
-            *)
-                clear
-                opt "Pick an option from the menu"
-                MENU_FN
+                *)
+                    clear
+                    opt "Pick an option from the menu"
+                    MENU_FN
                 ;;
             esac
         fi
@@ -1670,208 +1670,208 @@ clear
 #fi
 while test $# -gt 0; do
     case "$1" in
-    -help | --help)
-        readmes
+        -help | --help)
+            readmes
         ;;
-    -d | --d)
-        if test $# -gt 0; then
-            linuxclientdebug
-        else
-            echo ""
-            exit 1
-        fi
-        ;;
-    -l | --d)
-        if test $? -gt 0; then
-            DATE=$(date +%H:%M)
-            echo "$DATE"
-            MENU_FN 2>&1 | sudo tee adconnection.log
-        else
-            echo ""
-            exit 1
-        fi
-        ;;
-    -j | --j)
-        if test $# -gt 0; then
-            if ! sudo realm join -v -U "$2" "$3" --install=/; then
-                echo "${RED_TEXT}AD join failed.please check your errors with journalctl -xe${END}"
-                exit
-            fi
-            exit
-        else
-            echo ""
-            exit 1
-        fi
-        ;;
-    -s | --s)
-        if test $# -gt 0; then
-            if ! realm discover </dev/null >/dev/null 2>&1; then
-                clear
+        -d | --d)
+            if test $# -gt 0; then
+                linuxclientdebug
+            else
                 echo ""
-                echo "realmd is not installed"
-                echo ""
-                exit
-            else
-                sudo realm discover
-                exit
+                exit 1
             fi
-        else
-            echo ""
-            exit 1
-        fi
         ;;
-    -u | --u)
-        if test $# -gt 0; then
-            clear
-            export HOSTNAME
-            myhost=$(hostname | cut -d '.' -f1)
-            DOMAIN=$(realm discover | grep -i realm.name | awk '{print $2}' | tr "[:upper:]" "[:lower:]")
-            if [ -z "$2" ]; then
-                if [ -d /home/"$DOMAIN" ]; then
-                    ls /home/"$DOMAIN"/ | while read -r user; do
-                        id "$user"
-                        echo "___________________________________________________________________________"
-                        echo ""
-                    done
-                else
-                    echo "no user found on this system. try typing the user:"
-                    read -r user
-                    id "$user" | grep "$myhost"
-                fi
+        -l | --d)
+            if test $? -gt 0; then
+                DATE=$(date +%H:%M)
+                echo "$DATE"
+                MENU_FN 2>&1 | sudo tee adconnection.log
             else
-                id "$2"
-            fi
-            exit
-        fi
-        ;;
-    -o | --o)
-        if test $# -gt 0; then
-            desktop=$(sudo apt list --installed | grep -i desktop | grep -i ubuntu | cut -d '-' -f1 | grep -i desktop)
-            rasp=$(lsb_release -a | grep -i Distributor | awk '{print $3}')
-            kalilinux=$(lsb_release -a | grep -i Distributor | awk '{print $3}')
-            if [ "$desktop" = "desktop" ]; then
-                if [ "$rasp" = "Raspbian" ]; then
-                    echo "${INTRO_TEXT}Detecting Raspberry Pi${END}"
-                    raspberry
-                else
-                    if [ "$kalilinux" = "Kali" ]; then
-                        echo "${INTRO_TEXT}Detecting Kali linux${END}"
-                        kalijoin
-                    else
-                        echo ""
-                    fi
-                fi
-            else
-                echo "this seems to be a server, Switching to server mode"
-                ubuntuserver14
-            fi
-            export HOSTNAME
-            myhost=$(hostname | cut -d '.' -f1)
-            clear
-            sudo echo "${RED_TEXT}Installing packages do no abort!.......${END}"
-            sudo apt-get -qq install realmd adcli sssd -y
-            sudo apt-get -qq install ntp -y
-            sudo apt-get install -f -y
-            clear
-            if ! sudo dpkg -l | grep realmd; then
-                clear
-                sudo echo "${RED_TEXT}Installing packages failed.. please check connection ,dpkg and apt-get update then try again.${END}"
-                exit
-            else
-                clear
-                sudo echo "${INTRO_TEXT}packages installed${END}"
-            fi
-            echo "hostname is $myhost"
-            echo "Looking for Realms.. please wait"
-            DOMAIN=$(realm discover | grep -i realm.name | awk '{print $2}')
-            if ! ping -c 2 "$DOMAIN" >/dev/null; then
-                clear
-                echo "${NUMBER}I searched for an available domain and found nothing, please type your domain manually below...${END}"
-                echo "Please enter the domain you wish to join:"
-                read -r DOMAIN
-            else
-                clear
-                echo "${NUMBER}I searched for an available domain and found ${MENU}>>> $DOMAIN  <<<${END}${END}"
-                read -r -p "Do you wish to use it (y/n)?" yn
-                case $yn in
-                [Yy]*) echo "" ;;
-
-                [Nn]*)
-                    echo "Please enter the domain you wish to join:"
-                    read -r DOMAIN
-                    ;;
-                *) echo 'Please answer yes or no.' ;;
-                esac
-            fi
-            NetBios=$(echo "$DOMAIN" | cut -d '.' -f1)
-            clear
-            var=$(lsb_release -a | grep -i release | awk '{print $2}' | cut -d '.' -f1)
-            if [ "$var" -eq "14" ]; then
-                echo "Installing additional dependencies"
-                sudo apt-get -qq install -y realmd sssd sssd-tools samba-common krb5-user
-                sudo apt-get install -f -y
-                clear
-                echo "${INTRO_TEXT}Detecting Ubuntu $var${END}"
-                sudo echo "${INTRO_TEXT}Realm=$DOMAIN${END}"
-                echo "${INTRO_TEXT}Joining Ubuntu $var${END}"
                 echo ""
-                echo "${INTRO_TEXT}Please log in with domain admin to $DOMAIN to connect${END}"
-                echo "${INTRO_TEXT}Please type Admin user:${END}"
-                read -r ADMIN
-                if ! realm join -v --user="$ADMIN" --computer-ou="$2" "$DOMAIN" --install=/; then
+                exit 1
+            fi
+        ;;
+        -j | --j)
+            if test $# -gt 0; then
+                if ! sudo realm join -v -U "$2" "$3" --install=/; then
                     echo "${RED_TEXT}AD join failed.please check your errors with journalctl -xe${END}"
                     exit
                 fi
+                exit
             else
-                if [ "$var" -eq "16" ]; then
-                    echo "${INTRO_TEXT}Detecting Ubuntu $var${END}"
+                echo ""
+                exit 1
+            fi
+        ;;
+        -s | --s)
+            if test $# -gt 0; then
+                if ! realm discover </dev/null >/dev/null 2>&1; then
                     clear
+                    echo ""
+                    echo "realmd is not installed"
+                    echo ""
+                    exit
+                else
+                    sudo realm discover
+                    exit
+                fi
+            else
+                echo ""
+                exit 1
+            fi
+        ;;
+        -u | --u)
+            if test $# -gt 0; then
+                clear
+                export HOSTNAME
+                myhost=$(hostname | cut -d '.' -f1)
+                DOMAIN=$(realm discover | grep -i realm.name | awk '{print $2}' | tr "[:upper:]" "[:lower:]")
+                if [ -z "$2" ]; then
+                    if [ -d /home/"$DOMAIN" ]; then
+                        ls /home/"$DOMAIN"/ | while read -r user; do
+                            id "$user"
+                            echo "___________________________________________________________________________"
+                            echo ""
+                        done
+                    else
+                        echo "no user found on this system. try typing the user:"
+                        read -r user
+                        id "$user" | grep "$myhost"
+                    fi
+                else
+                    id "$2"
+                fi
+                exit
+            fi
+        ;;
+        -o | --o)
+            if test $# -gt 0; then
+                desktop=$(sudo apt list --installed | grep -i desktop | grep -i ubuntu | cut -d '-' -f1 | grep -i desktop)
+                rasp=$(lsb_release -a | grep -i Distributor | awk '{print $3}')
+                kalilinux=$(lsb_release -a | grep -i Distributor | awk '{print $3}')
+                if [ "$desktop" = "desktop" ]; then
+                    if [ "$rasp" = "Raspbian" ]; then
+                        echo "${INTRO_TEXT}Detecting Raspberry Pi${END}"
+                        raspberry
+                    else
+                        if [ "$kalilinux" = "Kali" ]; then
+                            echo "${INTRO_TEXT}Detecting Kali linux${END}"
+                            kalijoin
+                        else
+                            echo ""
+                        fi
+                    fi
+                else
+                    echo "this seems to be a server, Switching to server mode"
+                    ubuntuserver14
+                fi
+                export HOSTNAME
+                myhost=$(hostname | cut -d '.' -f1)
+                clear
+                sudo echo "${RED_TEXT}Installing packages do no abort!.......${END}"
+                sudo apt-get -qq install realmd adcli sssd -y
+                sudo apt-get -qq install ntp -y
+                sudo apt-get install -f -y
+                clear
+                if ! sudo dpkg -l | grep realmd; then
+                    clear
+                    sudo echo "${RED_TEXT}Installing packages failed.. please check connection ,dpkg and apt-get update then try again.${END}"
+                    exit
+                else
+                    clear
+                    sudo echo "${INTRO_TEXT}packages installed${END}"
+                fi
+                echo "hostname is $myhost"
+                echo "Looking for Realms.. please wait"
+                DOMAIN=$(realm discover | grep -i realm.name | awk '{print $2}')
+                if ! ping -c 2 "$DOMAIN" >/dev/null; then
+                    clear
+                    echo "${NUMBER}I searched for an available domain and found nothing, please type your domain manually below...${END}"
+                    echo "Please enter the domain you wish to join:"
+                    read -r DOMAIN
+                else
+                    clear
+                    echo "${NUMBER}I searched for an available domain and found ${MENU}>>> $DOMAIN  <<<${END}${END}"
+                    read -r -p "Do you wish to use it (y/n)?" yn
+                    case $yn in
+                        [Yy]*) echo "" ;;
+                        
+                        [Nn]*)
+                            echo "Please enter the domain you wish to join:"
+                            read -r DOMAIN
+                        ;;
+                        *) echo 'Please answer yes or no.' ;;
+                    esac
+                fi
+                NetBios=$(echo "$DOMAIN" | cut -d '.' -f1)
+                clear
+                var=$(lsb_release -a | grep -i release | awk '{print $2}' | cut -d '.' -f1)
+                if [ "$var" -eq "14" ]; then
+                    echo "Installing additional dependencies"
+                    sudo apt-get -qq install -y realmd sssd sssd-tools samba-common krb5-user
+                    sudo apt-get install -f -y
+                    clear
+                    echo "${INTRO_TEXT}Detecting Ubuntu $var${END}"
                     sudo echo "${INTRO_TEXT}Realm=$DOMAIN${END}"
                     echo "${INTRO_TEXT}Joining Ubuntu $var${END}"
                     echo ""
                     echo "${INTRO_TEXT}Please log in with domain admin to $DOMAIN to connect${END}"
                     echo "${INTRO_TEXT}Please type Admin user:${END}"
                     read -r ADMIN
-                    if ! realm join -v --user="$ADMIN" --computer-ou="$2" "$DOMAIN"; then
+                    if ! realm join -v --user="$ADMIN" --computer-ou="$2" "$DOMAIN" --install=/; then
                         echo "${RED_TEXT}AD join failed.please check your errors with journalctl -xe${END}"
                         exit
                     fi
                 else
-                    if [ "$var" -eq "17" ] || [ "$var" -eq "18" ] || [ "$var" -eq "19" ]; then
+                    if [ "$var" -eq "16" ]; then
                         echo "${INTRO_TEXT}Detecting Ubuntu $var${END}"
-                        sleep 1
                         clear
-                        if [ "$var" -eq "19" ]; then
-                            echo "fixing krb5.keytab: Bad encryption type for ubuntu 19.10"
-                            sudo add-apt-repository ppa:aroth/ppa
-                            sudo apt-get update
-                            sudo apt-get --only-upgrade install adcli
-                        fi
                         sudo echo "${INTRO_TEXT}Realm=$DOMAIN${END}"
                         echo "${INTRO_TEXT}Joining Ubuntu $var${END}"
                         echo ""
                         echo "${INTRO_TEXT}Please log in with domain admin to $DOMAIN to connect${END}"
                         echo "${INTRO_TEXT}Please type Admin user:${END}"
                         read -r ADMIN
-                        if ! realm join -v --user="$ADMIN" --computer-ou="$2" "$DOMAIN" --install=/; then
-                            echo "${RED_TEXT}AD join failed. Please check your errors with journalctl -xe${END}"
+                        if ! realm join -v --user="$ADMIN" --computer-ou="$2" "$DOMAIN"; then
+                            echo "${RED_TEXT}AD join failed.please check your errors with journalctl -xe${END}"
                             exit
                         fi
                     else
-                        clear
-                        sudo echo "${RED_TEXT}I am having issues detecting your Ubuntu version${END}"
-                        exit
+                        if [ "$var" -eq "17" ] || [ "$var" -eq "18" ] || [ "$var" -eq "19" ]; then
+                            echo "${INTRO_TEXT}Detecting Ubuntu $var${END}"
+                            sleep 1
+                            clear
+                            if [ "$var" -eq "19" ]; then
+                                echo "fixing krb5.keytab: Bad encryption type for ubuntu 19.10"
+                                sudo add-apt-repository ppa:aroth/ppa
+                                sudo apt-get update
+                                sudo apt-get --only-upgrade install adcli
+                            fi
+                            sudo echo "${INTRO_TEXT}Realm=$DOMAIN${END}"
+                            echo "${INTRO_TEXT}Joining Ubuntu $var${END}"
+                            echo ""
+                            echo "${INTRO_TEXT}Please log in with domain admin to $DOMAIN to connect${END}"
+                            echo "${INTRO_TEXT}Please type Admin user:${END}"
+                            read -r ADMIN
+                            if ! realm join -v --user="$ADMIN" --computer-ou="$2" "$DOMAIN" --install=/; then
+                                echo "${RED_TEXT}AD join failed. Please check your errors with journalctl -xe${END}"
+                                exit
+                            fi
+                        else
+                            clear
+                            sudo echo "${RED_TEXT}I am having issues detecting your Ubuntu version${END}"
+                            exit
+                        fi
                     fi
                 fi
+                fi_auth
+            else
+                echo ""
+                exit 1
             fi
-            fi_auth
-        else
-            echo ""
-            exit 1
-        fi
         ;;
-    *)
-        break
+        *)
+            break
         ;;
     esac
 done
