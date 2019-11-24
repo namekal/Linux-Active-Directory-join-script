@@ -699,6 +699,7 @@ ubuntuDesktop() {
 ubuntuServer() {
     export HOSTNAME
     myhost=$(hostname | cut -d '.' -f1)
+    dhcpDomain=$(hostname -d)
     clear
     sudo echo "${RED_TEXT}Installing packages do no abort!.......${END}"
     sudo apt-get -qq install realmd adcli sssd -y
@@ -715,25 +716,28 @@ ubuntuServer() {
         sudo echo "${INTRO_TEXT}packages installed${END}"
     fi
     sleep 1
-    DOMAIN=$(realm discover | grep -i realm-name | awk '{print $2}')
+    DOMAIN=$(realm discover $dhcpDomain | grep -i realm-name | awk '{print $2}')
     if ! ping -c 1 "$DOMAIN"; then
-        clear
-        echo "${NUMBER}I searched for an available domain and found nothing, please type your domain manually below... ${END}"
-        echo "Please enter the domain you wish to join:"
-        read -r DOMAIN
-    else
-        clear
-        echo "${NUMBER}I searched for an available domain and found ${MENU}>>> $DOMAIN  <<<${END}${END}"
-        read -r -p "Do you wish to use it (y/n)?" yn
-        case $yn in
-            [Yy]*) echo "${INTRO_TEXT}Please log in with domain admin to $DOMAIN to connect${END}" ;;
+        DOMAIN=$(realm discover -v $(cat /etc/resolv.conf |grep -i ^search |sed -r 's/search //'))
+        if ! ping -c 1 "$DOMAIN"; then
+            clear
+            echo "${NUMBER}I searched for an available domain and found nothing, please type your domain manually below... ${END}"
+            echo "Please enter the domain you wish to join:"
+            read -r DOMAIN
+        else
+            clear
+            echo "${NUMBER}I searched for an available domain and found ${MENU}>>> $DOMAIN  <<<${END}${END}"
+            read -r -p "Do you wish to use it (y/n)?" yn
+            case $yn in
+                [Yy]*) echo "${INTRO_TEXT}Please log in with domain admin access to $DOMAIN to connect${END}" ;;
             
-            [Nn]*)
-                echo "Please enter the domain you wish to join:"
-                read -r DOMAIN
-            ;;
-            *) echo 'Please answer yes or no.' ;;
-        esac
+                [Nn]*)
+                    echo "Please enter the domain you wish to join:"
+                    read -r DOMAIN
+                ;;
+                *) echo 'Please answer yes or no.' ;;
+            esac
+        fi
     fi
     sudo echo "${INTRO_TEXT}Realm= $DOMAIN${END}"
     sudo echo "${NORMAL}${NORMAL}"
@@ -747,7 +751,7 @@ ubuntuServer() {
     echo "${NUMBER}Be sure to escape out all whitespaces, if applicable.${END}"
     read -r Mysrvgroup
     sudo echo "############################"
-    sudo echo "Configurating files.."
+    sudo echo "Configuring files.."
     sudo echo "Verifying the setup"
     sudo systemctl enable sssd
     sudo systemctl start sssd
@@ -829,7 +833,7 @@ ubuntuServer() {
         echo "Realm not found"
     else
         therealm=$(realm list | grep -i realm-name | awk '{print $2}')
-        if [ "$therealm" = "no" ]; then
+        if [ "$therealm" = "no" ] || [ -z "$therealm"]; then
             echo Realm configured?.. "${RED_TEXT}FAIL${END}"
         else
             echo Realm configured?.. "${INTRO_TEXT}OK${END}"
@@ -874,7 +878,7 @@ ubuntuServer() {
     #cache_credentials = TRUE
     entry_cache_nowait_percentage = 75" | sudo tee -a /etc/sssd/sssd.conf
     sudo service sssd restart
-    realm discover "$DOMAIN"
+    realm discover -v "$DOMAIN"
     echo "${INTRO_TEXT}Please reboot your machine and wait 3 min for Active Directory to sync before login${END}"
     exit
 }
