@@ -1372,36 +1372,25 @@ Reauthenticate() {
         DOMAIN=$(realm list | grep -i realm.name | awk '{print $2}')
         SSSD=$(sudo grep domain /etc/sssd/sssd.conf | awk '{print $3}' | head -1)
         DOMAINlower=$(echo "$DOMAIN" | tr '[:upper:]' '[:lower:]')
-
-        if [ "$DOMAINlower" = "$SSSD" ] && [ -n "$DOMAINlower" ] && [ -n "$SSSD" ]; then
-            echo "Detecting realm $SSSD"
-        else
-            if [ "$LEFT" = "no" ]; then
-                echo ""
-                echo "$DOMAIN has not been configured"
-                echo ""
-                exit
-            fi
-        read -r -p "Do you really want to leave the domain: $DOMAIN (y/n)?" yn
-        case $yn in
-            [Yy]*)
-                echo "Listing domain"
-                sudo realm discover "$DOMAIN"
-                sudo realm leave "$DOMAIN"
-                LEFT=$(sudo realm discover "$DOMAIN"| grep configured | awk '{print $2}')
+        if [ -n "$DOMAIN" ] || [ -n "$SSSD" ]; then
+            if [ "$DOMAINlower" = "$SSSD" ]; then
+                echo "Detecting realm $SSSD"
+            else
                 if [ "$LEFT" = "no" ]; then
                     echo ""
-                    sudo echo "" | sudo tee /etc/sssd/sssd.conf
-                    echo "$DOMAIN has been left"
+                    echo "$DOMAIN has not been configured"
                     echo ""
-                    notify-send ADconnection "Left $DOMAIN "
-                    linuxclient
-                else
-                    echo "something went wrong, try to leave manually"
-                    read -r DOMAIN
+                    exit
+                fi
+            
+            read -r -p "Do you really want to leave the domain: $DOMAIN (y/n)?" yn
+            case $yn in
+                [Yy]*)
+                    echo "Listing domain"
+                    sudo realm discover "$DOMAIN"
                     sudo realm leave "$DOMAIN"
-                    left=$(sudo realm discover "$DOMAIN" | grep configured | awk '{print $2}')
-                    if [ "$left" = "no" ]; then
+                    LEFT=$(sudo realm discover "$DOMAIN"| grep configured | awk '{print $2}')
+                    if [ "$LEFT" = "no" ]; then
                         echo ""
                         sudo echo "" | sudo tee /etc/sssd/sssd.conf
                         echo "$DOMAIN has been left"
@@ -1409,16 +1398,31 @@ Reauthenticate() {
                         notify-send ADconnection "Left $DOMAIN "
                         linuxclient
                     else
-                        echo "something went wrong"
+                        echo "something went wrong, try to leave manually"
+                        read -r DOMAIN
+                        sudo realm leave "$DOMAIN"
+                        left=$(sudo realm discover "$DOMAIN" | grep configured | awk '{print $2}')
+                        if [ "$left" = "no" ]; then
+                            echo ""
+                            sudo echo "" | sudo tee /etc/sssd/sssd.conf
+                            echo "$DOMAIN has been left"
+                            echo ""
+                            notify-send ADconnection "Left $DOMAIN "
+                            linuxclient
+                        else
+                            echo "something went wrong"
+                        fi
                     fi
-                fi
-            ;;
-            [Nn]*)
-                echo "Bye"
-                exit
-            ;;
-            *) echo 'Please answer yes or no.' ;;
-        esac
+                ;;
+                [Nn]*)
+                    echo "Bye"
+                    exit
+                ;;
+                *) echo 'Please answer yes or no.' ;;
+            esac
+            fi
+            echo 'No configured realms available.'
+            echo 'Join a Realm first.'
         fi
         exit
     fi
