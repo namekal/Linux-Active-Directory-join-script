@@ -28,7 +28,7 @@ END=$(printf "\033[0m")
 
 ################################ fix errors # funktion not called ################
 fixerrors() {
-    #this funktion is not called in the script : to activate, uncomment line line 31 #fixerrors
+    #this funktion is not called in the script : to activate, uncomment line 37 #fixerrors
     #This funktion installs additional packages due to known issues with Joining and the join hangs after the admin auth
     sudo add-apt-repository ppa:xtrusia/packagekit-fix
     sudo apt-get update
@@ -256,7 +256,7 @@ fi_auth_yum() {
     export HOSTNAME
     myhost=$(hostname | cut -d '.' -f1)
     sudo echo "############################"
-    sudo echo "Configuratig files.."
+    sudo echo "Configurating files.."
     sudo echo "Verifying the setup"
     sudo systemctl enable sssd
     sudo systemctl start sssd
@@ -700,8 +700,8 @@ ubuntuServer() {
     export HOSTNAME
     myhost=$(hostname | cut -d '.' -f1)
     dhcpDomain=$(hostname -d)
-    clear
-    sudo echo "${RED_TEXT}Installing packages do no abort!.......${END}"
+    
+    sudo echo "${RED_TEXT}Installing packages do not abort!.......${END}"
     sudo apt-get -qq install realmd adcli sssd -y
     sudo apt-get -qq install ntp -y
     sudo apt-get -qq install -y sssd-tools samba-common krb5-user
@@ -716,7 +716,9 @@ ubuntuServer() {
         sudo echo "${INTRO_TEXT}packages installed${END}"
     fi
     sleep 1
-    DOMAIN=$(realm discover $dhcpDomain | grep -i realm-name | awk '{print $2}')
+    if [ -z $DOMAIN ]; then 
+        DOMAIN=$(realm discover $dhcpDomain | grep -i realm-name | awk '{print $2}')
+    fi
     if ! ping -c 1 "$DOMAIN"; then
         DOMAIN=$(realm discover -v $(cat /etc/resolv.conf |grep -i ^search |sed -r 's/search //') | grep -i realm-name | awk '{print $2}')
         if ! ping -c 1 "$DOMAIN"; then
