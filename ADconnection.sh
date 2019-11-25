@@ -1382,7 +1382,6 @@ Reauthenticate() {
                 echo ""
                 exit
             fi
-        fi
         read -r -p "Do you really want to leave the domain: $DOMAIN (y/n)?" yn
         case $yn in
             [Yy]*)
@@ -1420,6 +1419,7 @@ Reauthenticate() {
             ;;
             *) echo 'Please answer yes or no.' ;;
         esac
+        fi
         exit
     fi
 }
