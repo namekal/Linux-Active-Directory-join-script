@@ -1386,7 +1386,7 @@ Reauthenticate() {
                 echo "Listing domain"
                 sudo realm discover "$DOMAIN"
                 sudo realm leave "$DOMAIN"
-                LEFT=$(sudo realm discover | grep configured | awk '{print $2}')
+                LEFT=$(sudo realm discover "$DOMAIN"| grep configured | awk '{print $2}')
                 if [ "$LEFT" = "no" ]; then
                     echo ""
                     sudo echo "" | sudo tee /etc/sssd/sssd.conf
@@ -1398,7 +1398,7 @@ Reauthenticate() {
                     echo "something went wrong, try to leave manually"
                     read -r DOMAIN
                     sudo realm leave "$DOMAIN"
-                    left=$(sudo realm discover | grep configured | awk '{print $2}')
+                    left=$(sudo realm discover "$DOMAIN" | grep configured | awk '{print $2}')
                     if [ "$left" = "no" ]; then
                         echo ""
                         sudo echo "" | sudo tee /etc/sssd/sssd.conf
