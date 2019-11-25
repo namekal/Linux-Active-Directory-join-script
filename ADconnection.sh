@@ -1421,6 +1421,7 @@ Reauthenticate() {
                 *) echo 'Please answer yes or no.' ;;
             esac
             fi
+            else
             echo 'No configured realms available.'
             echo 'Join a Realm first.'
         fi
