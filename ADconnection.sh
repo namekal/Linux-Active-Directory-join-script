@@ -1372,7 +1372,8 @@ Reauthenticate() {
         DOMAIN=$(realm list | grep -i realm.name | awk '{print $2}')
         SSSD=$(sudo grep domain /etc/sssd/sssd.conf | awk '{print $3}' | head -1)
         DOMAINlower=$(echo "$DOMAIN" | tr '[:upper:]' '[:lower:]')
-        if [ "$DOMAINlower" = "$SSSD" ]; then
+
+        if [ "$DOMAINlower" = "$SSSD" ] && [ -n $DOMAINlower ] && [ -n $SSSD ]; then
             echo "Detecting realm $SSSD"
         else
             if [ "$LEFT" = "no" ]; then
