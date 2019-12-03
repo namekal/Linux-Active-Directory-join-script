@@ -751,7 +751,8 @@ ubuntuServer() {
     fi
     echo "${NORMAL}Please type group name in AD for admins${END}"
     echo "${NUMBER}Be sure to escape out all whitespaces, if applicable.${END}"
-    read -r Mysrvgroup
+    read -r "Mysrvgroup"
+    #Mysrvgroup=$(sed -En 's/^\\s/\\&/gp' <<< $Mysrvgroup )
     sudo echo "############################"
     sudo echo "Configuring files.."
     sudo echo "Verifying the setup"
