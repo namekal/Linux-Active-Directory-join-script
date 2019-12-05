@@ -249,7 +249,6 @@ fi_auth() {
     exit
 }
 
-
 fi_auth_new() {
     echo "############################"
     echo "Configuring files.."
@@ -372,8 +371,7 @@ fi_auth_new() {
         fi
     fi
 
-
-        ################################# Check #######################################
+    ################################# Check #######################################
     if ! realm discover $DOMAIN; then
         echo "Realm not found"
     else
@@ -411,7 +409,7 @@ fi_auth_new() {
     else
         echo "Checking PAM auth configuration..${RED_TEXT}SSH security not configured${END}"
     fi
-    
+
     sudo sed -i -e 's/fallback_homedir = \/home\/%u@%d/#fallback_homedir = \/home\/%u@%d/g' /etc/sssd/sssd.conf
     sudo sed -i -e 's/use_fully_qualified_names = True/use_fully_qualified_names = False/g' /etc/sssd/sssd.conf
     sudo sed -i -e 's/access_provider = ad/access_provider = simple/g' /etc/sssd/sssd.conf
@@ -431,17 +429,16 @@ fi_auth_new() {
     sudo service sssd restart
     realm discover -v "$DOMAIN"
     if ! realm discover $DOMAIN; then
-            echo "realm not found"
+        echo "realm not found"
+    else
+        if [ "$therealm" = "no" ]; then
+            echo "${RED_TEXT}Join has Failed${END}"
         else
-            if [ "$therealm" = "no" ]; then
-                echo "${RED_TEXT}Join has Failed${END}"
-            else
-                lastverify=$(realm discover "$DOMAIN" | grep -m 1 "$DOMAIN")
-                echo ""
-                echo "${INTRO_TEXT}joined to $lastverify${END}"
-                echo ""
-                notify-send ADconnection "Joined $lastverify "
-            fi
+            lastverify=$(realm discover "$DOMAIN" | grep -m 1 "$DOMAIN")
+            echo ""
+            echo "${INTRO_TEXT}joined to $lastverify${END}"
+            echo ""
+            notify-send ADconnection "Joined $lastverify "
         fi
         echo "${INTRO_TEXT}Please reboot your machine and wait 3 min for Active Directory to sync before login${END}"
         exit
@@ -956,7 +953,7 @@ ubuntuServer() {
     export Mysrvgroup
     #Mysrvgroup=$(sed -En 's/^\\s/\\&/gp' <<< $Mysrvgroup )
     fi_auth_new
- 
+
 }
 
 ####################################### Kali ############################################
@@ -1026,17 +1023,14 @@ debianclient() {
     export HOSTNAME
     myhost=$(hostname | cut -d '.' -f1)
     dhcpDomain=$(hostname -d)
-    
-    if dpkg -l | grep openmediavault; then 
+
+    if dpkg -l | grep openmediavault; then
         apt-mark hold openmediavault
     fi
 
     if ! dkpg -l | grep sudo; then
         apt-get install sudo -y
     else
-
-    
-
 
         echo ""
         export whoami
@@ -1065,8 +1059,8 @@ debianclient() {
         clear
         sudo echo "${INTRO_TEXT}packages installed${END}"
     fi
-    
-    if dpkg -l | grep openmediavault; then 
+
+    if dpkg -l | grep openmediavault; then
         apt-mark unhold openmediavault
     fi
     echo "hostname is $myhost"
