@@ -953,7 +953,7 @@ debianclient() {
     export HOSTNAME
     myhost=$(hostname | cut -d '.' -f1)
     if ! dkpg -l | grep sudo; then
-        apt get install sudo -y
+        apt-get install sudo -y
     else
         echo ""
         export whoami
@@ -963,7 +963,7 @@ debianclient() {
         echo "$admins ALL=(ALL:ALL) ALL | tee -a /etc/sudoers.d/admin"
     fi
     clear
-    sudo echo "${RED_TEXT}Installing packages do no abort!.......${END}"
+    sudo echo "${RED_TEXT}Installing packages do not abort!.......${END}"
     sudo apt-get -qq update
     sudo apt-get -qq install libsss-sudo -y
     sudo apt-get -qq install realmd adcli sssd -y
