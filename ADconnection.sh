@@ -961,6 +961,7 @@ ubuntuServer() {
             grep "127.0.1.1" /etc/hosts
         fi
     fi
+    sed -Ei "s/standalone server/member server/g" /etc/samba/smb.conf
     echo "${NORMAL}Please type group name in AD for admins${END}"
     echo "${NUMBER}Be sure to escape out all whitespaces, if applicable.${END}"
     read -r "Mysrvgroup"
