@@ -950,16 +950,22 @@ ubuntuServer() {
         echo "${RED_TEXT}AD join failed. Please check your errors with ${INTRO_TEXT}journalctl -xe${END}"
         exit
     fi
+    if ! grep $(hostname -d) /etc/hosts; then #fix hosts file to have domain before joining
+        if grep $(hostname -s) /etc/hosts; then
+            grep $(hostname -s) /etc/hosts
+            echo "Modifying..."
+            sed -Ei "s/($(hostname -s))/\1.$(hostname -d) \1/g" /etc/hosts
+            grep $(hostname -s) /etc/hosts
+        elif ! grep "127.0.1.1" /etc/hosts; then
+            echo "127.0.1.1         $(hostname -s).$(hostname -d) $(hostname -s)" >>/etc/hosts
+            grep "127.0.1.1" /etc/hosts
+        fi
+    fi
     echo "${NORMAL}Please type group name in AD for admins${END}"
     echo "${NUMBER}Be sure to escape out all whitespaces, if applicable.${END}"
     read -r "Mysrvgroup"
     export Mysrvgroup
-    if ! grep $(hostname -d) /etc/hosts; then #fix hosts file to have domain before joining
-        grep $(hostname -s) /etc/hosts
-        echo "Modifying..."
-        sed -Ei "s/($(hostname -s))/\1.$(hostname -d) \1/g" /etc/hosts
-        grep $(hostname -s) /etc/hosts
-    fi
+
     kinit $DomainADMIN
     echo "[sssd]
         services = nss, pam, pac, ssh
@@ -1030,9 +1036,9 @@ ubuntuServer() {
 
     if ! sudo net ads join -k; then
         #if ! sudo realm join -v -U "$DomainADMIN" "$DOMAIN" --install=/; then
-            echo "${RED_TEXT}AD join failed. Please check your errors with ${INTRO_TEXT}journalctl -xe${END}"
-            read -n 1 -s -r -p "Press any key to continue..."
-            exit
+        echo "${RED_TEXT}AD join failed. Please check your errors with ${INTRO_TEXT}journalctl -xe${END}"
+        read -n 1 -s -r -p "Press any key to continue..."
+        exit
         #fi
     fi
     fi_auth_new
@@ -1186,10 +1192,17 @@ debianclient() {
 
     #if ! sudo realm join -v -U "$DomainADMIN" "$DOMAIN" --install=/; then
     if ! grep $(hostname -d) /etc/hosts; then #fix hosts file to have domain before joining
-        grep $(hostname -s) /etc/hosts
-        echo "Modifying..."
-        sed -Ei "s/($(hostname -s))/\1.$(hostname -d) \1/g" /etc/hosts
-        grep $(hostname -s) /etc/hosts
+        if grep $(hostname -s) /etc/hosts; then
+            grep $(hostname -s) /etc/hosts
+            echo "Modifying..."
+            sed -Ei "s/($(hostname -s))/\1.$(hostname -d) \1/g" /etc/hosts
+            grep $(hostname -s) /etc/hosts
+        else
+            if ! grep "127.0.1.1" /etc/hosts; then
+                echo "127.0.1.1         $(hostname -s).$(hostname -d) $(hostname -s)" >>/etc/hosts
+                grep "127.0.1.1" /etc/hosts
+            fi
+        fi
     fi
     echo "${NORMAL}Please type group name in AD for admins${END}"
     echo "${NUMBER}Be sure to escape out all whitespaces, if applicable.${END}"
@@ -1220,7 +1233,7 @@ debianclient() {
         # ldap_idmap_range_max = 60000    ### Does not seem to work
         #                                ### Causes not able to start
         # If unneeded users or other objects show.
-        # Use "dsquery user -name * "  to see on windows with powershell
+        # Use \"dsquery user -name * \"  to see on windows with powershell
         #ldap_user_search_base = OU=SBSUsers,OU=Users,OU=MyBusiness,DC=example,DC=com
         # ldap_user_search_base = CN=Users,DC=example,DC=com
         # Use this if users are being logged in at /.  OMV does this. Otherwise not tested
@@ -1260,19 +1273,19 @@ debianclient() {
         # Uncomment if the AD domain is named differently than the Samba domain
         # ad_domain = ${DOMAIN,,}
         # filter_groups =
-        # For other options see "man sssd.conf"
+        # For other options see \"man sssd.conf\"
         # https://jhrozek.wordpress.com/2015/03/11/anatomy-of-sssd-user-lookup/" >/etc/sssd/sssd.conf
     chmod 0600 /etc/sssd/sssd.conf
     if ! sudo net ads join -k; then
         #if ! sudo realm join -v -U "$DomainADMIN" "$DOMAIN" --install=/; then
-            echo "${RED_TEXT}AD join failed. Please check your errors with ${INTRO_TEXT}journalctl -xe${END}"
-            read -n 1 -s -r -p "Press any key to continue..."
-            exit
-       # fi
+        echo "${RED_TEXT}AD join failed. Please check your errors with ${INTRO_TEXT}journalctl -xe${END}"
+        read -n 1 -s -r -p "Press any key to continue..."
+        exit
+        # fi
     fi
     fi_auth_new
-}
 
+}
 ####################################### Cent OS #########################################
 CentOS() {
     export HOSTNAME
