@@ -1029,11 +1029,11 @@ ubuntuServer() {
     chmod 0600 /etc/sssd/sssd.conf
 
     if ! sudo net ads join -k; then
-        if ! sudo realm join -v -U "$DomainADMIN" "$DOMAIN" --install=/; then
+        #if ! sudo realm join -v -U "$DomainADMIN" "$DOMAIN" --install=/; then
             echo "${RED_TEXT}AD join failed. Please check your errors with ${INTRO_TEXT}journalctl -xe${END}"
             read -n 1 -s -r -p "Press any key to continue..."
             exit
-        fi
+        #fi
     fi
     fi_auth_new
 
@@ -1264,11 +1264,11 @@ debianclient() {
         # https://jhrozek.wordpress.com/2015/03/11/anatomy-of-sssd-user-lookup/" >/etc/sssd/sssd.conf
     chmod 0600 /etc/sssd/sssd.conf
     if ! sudo net ads join -k; then
-        if ! sudo realm join -v -U "$DomainADMIN" "$DOMAIN" --install=/; then
+        #if ! sudo realm join -v -U "$DomainADMIN" "$DOMAIN" --install=/; then
             echo "${RED_TEXT}AD join failed. Please check your errors with ${INTRO_TEXT}journalctl -xe${END}"
             read -n 1 -s -r -p "Press any key to continue..."
             exit
-        fi
+       # fi
     fi
     fi_auth_new
 }
