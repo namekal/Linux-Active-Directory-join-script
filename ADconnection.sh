@@ -950,14 +950,14 @@ ubuntuServer() {
     #    echo "${RED_TEXT}AD join failed. Please check your errors with ${INTRO_TEXT}journalctl -xe${END}"
     #    exit
     #fi
-    if ! grep $DOMAIN /etc/hosts; then #fix hosts file to have domain before joining
+    if ! grep -i $DOMAIN /etc/hosts; then #fix hosts file to have domain before joining
         if grep $(hostname -s) /etc/hosts; then
             grep $(hostname -s) /etc/hosts
             echo "Modifying..."
-            sed -Ei "s/($(hostname -s))/\1.$DOMAIN \1/g" /etc/hosts
+            sed -Ei "s/($(hostname -s))/\1.${DOMAIN,,} \1/g" /etc/hosts
             grep $(hostname -s) /etc/hosts
         elif ! grep "127.0.1.1" /etc/hosts; then
-            echo "127.0.1.1         $(hostname -s).$DOMAIN $(hostname -s)" >>/etc/hosts
+            echo "127.0.1.1         $(hostname -s).${DOMAIN,,} $(hostname -s)" >>/etc/hosts
             grep "127.0.1.1" /etc/hosts
         fi
     fi
