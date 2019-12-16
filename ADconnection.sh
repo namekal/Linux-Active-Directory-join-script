@@ -1026,6 +1026,7 @@ ubuntuServer() {
         # filter_groups =
         # For other options see "man sssd.conf"
         # https://jhrozek.wordpress.com/2015/03/11/anatomy-of-sssd-user-lookup/" >/etc/sssd/sssd.conf
+    chmod 0600 /etc/sssd/sssd.conf
 
     if ! sudo net ads join -k; then
         if ! sudo realm join -v -U "$DomainADMIN" "$DOMAIN" --install=/; then
@@ -1261,7 +1262,7 @@ debianclient() {
         # filter_groups =
         # For other options see "man sssd.conf"
         # https://jhrozek.wordpress.com/2015/03/11/anatomy-of-sssd-user-lookup/" >/etc/sssd/sssd.conf
-
+    chmod 0600 /etc/sssd/sssd.conf
     if ! sudo net ads join -k; then
         if ! sudo realm join -v -U "$DomainADMIN" "$DOMAIN" --install=/; then
             echo "${RED_TEXT}AD join failed. Please check your errors with ${INTRO_TEXT}journalctl -xe${END}"
