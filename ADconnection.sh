@@ -53,7 +53,7 @@ fi_auth() {
     grouPs="null"
     therealm="null"
     cauth="null"
-    clear
+    #clear
     read -r -p "${RED_TEXT}Do you wish to enable SSH login.group.allowed${END}${NUMBER}(y/n)?${END}" yn
     case $yn in
     [Yy]*)
@@ -155,7 +155,7 @@ fi_auth() {
             echo "No lightdm to configure"
         fi
     fi
-    clear
+    #clear
     sed -i -e 's/fallback_homedir = \/home\/%u@%d/#fallback_homedir = \/home\/%u@%d/g' /etc/sssd/sssd.conf
     sed -i -e 's/use_fully_qualified_names = True/use_fully_qualified_names = False/g' /etc/sssd/sssd.conf
     sed -i -e 's/access_provider = ad/access_provider = simple/g' /etc/sssd/sssd.conf
@@ -180,7 +180,7 @@ fi_auth() {
     #ldap_group_member = uniquemember
     #ad_enable_gc = False
     entry_cache_nowait_percentage = 75" | sudo tee -a /etc/sssd/sssd.conf
-    clear
+    #clear
 
     ################################# Check #######################################
     if ! sudo service sssd restart; then
@@ -260,7 +260,7 @@ fi_auth_new() {
     grouPs="null"
     therealm="null"
     cauth="null"
-    clear
+    #clear
     read -r -p "${RED_TEXT}Do you wish to enable SSH login.group.allowed${END}${NUMBER}(y/n)?${END}" yn
     case $yn in
     [Yy]*)
@@ -279,7 +279,7 @@ fi_auth_new() {
                 case $yn_a in
                 [Yy]*) sudo echo "$admins" | sudo tee -a /etc/ssh/login.group.allowed ;;
                 [Nn]*)
-                    echo "please type name of current administrator"
+                    echo "Please type name of current administrator"
                     read -r -p MYADMIN
                     sudo echo "$MYADMIN" | sudo tee -a /etc/ssh/login.group.allowed
                     ;;
@@ -410,10 +410,10 @@ fi_auth_new() {
         echo "Checking PAM auth configuration..${RED_TEXT}SSH security not configured${END}"
     fi
 
-    sudo sed -i -e 's/fallback_homedir = \/home\/%u@%d/#fallback_homedir = \/home\/%u@%d/g' /etc/sssd/sssd.conf
-    sudo sed -i -e 's/use_fully_qualified_names = True/use_fully_qualified_names = False/g' /etc/sssd/sssd.conf
-    sudo sed -i -e 's/access_provider = ad/access_provider = simple/g' /etc/sssd/sssd.conf
-    sudo sed -i -e 's/sudoers:        files sss/sudoers:        files/g' /etc/nsswitch.conf
+    #sudo sed -Ei "s/fallback_homedir = \/home\/%u@%d/#&/g" /etc/sssd/sssd.conf
+    #sudo sed -Ei "s/(use_fully_qualified_names =) True/\1 False/g" /etc/sssd/sssd.conf
+    #sudo sed -Ei "s/(access_provider =) ad/\1 simple/g" /etc/sssd/sssd.conf
+    sudo sed -Ei "s/(sudoers:)\s*(files) (sss)/\1        files/g" /etc/nsswitch.conf
     sudo echo "override_homedir = /home/%d/%u" | sudo tee -a /etc/sssd/sssd.conf
     sudo grep -i override /etc/sssd/sssd.conf
     sudo echo "[nss]
@@ -429,7 +429,7 @@ fi_auth_new() {
     sudo service sssd restart
     realm discover -v "$DOMAIN"
     if ! realm discover $DOMAIN; then
-        echo "realm not found"
+        echo "Realm not found"
     else
         if [ "$therealm" = "no" ]; then
             echo "${RED_TEXT}Join has Failed${END}"
@@ -463,7 +463,7 @@ fi_auth_yum() {
     grouPs="null"
     therealm="null"
     cauth="null"
-    clear
+    #clear
     read -r -p 'Do you wish to enable SSH login.group.allowed (y/n)?' yn
     case $yn in
     [Yy]*)
@@ -557,7 +557,7 @@ fi_auth_yum() {
         echo "No lightdm to configure"
     fi
     coms=$(echo "$DOMAIN" | cut -d '.' -f2)
-    clear
+    #clear
     sed -i -e 's/fallback_homedir = \/home\/%u@%d/#fallback_homedir = \/home\/%u@%d/g' /etc/sssd/sssd.conf
     sed -i -e 's/use_fully_qualified_names = True/use_fully_qualified_names = False/g' /etc/sssd/sssd.conf
     sed -i -e 's/access_provider = ad/access_provider = simple/g' /etc/sssd/sssd.conf
@@ -788,30 +788,30 @@ linuxclient() {
 ubuntuDesktop() {
     export HOSTNAME
     myhost=$(hostname | cut -d '.' -f1)
-    clear
+    #clear
     sudo echo "${NUMBER}Installing packages, do not abort!.......${END}"
     if ! sudo apt-get -qq install realmd adcli sssd ntp -y && sudo apt-get -qq install -f -y; then
         echo "${RED_TEXT}Failed installing packages, please resolve dpkg and try again ${END}"
         exit 1
     fi
-    clear
+    #clear
     if ! sudo dpkg -l | grep realmd; then
-        clear
+        #clear
         sudo echo "${RED_TEXT}Installing packages failed.. please check connection ,dpkg and apt-get update then try again.${END}"
     else
-        clear
+        #clear
         sudo echo "${INTRO_TEXT}packages installed${END}"
     fi
     echo "hostname is $myhost"
     echo "Looking for Realms.. please wait"
     DOMAIN=$(realm discover | grep -i realm.name | awk '{print $2}')
     if ! ping -c 2 "$DOMAIN" </dev/null >/dev/null 2>&1; then
-        clear
+        #clear
         echo "${NUMBER}I searched for an available domain and found nothing, please type your domain manually below... ${END}"
         echo "Please enter the domain you wish to join:"
         read -r DOMAIN
     else
-        clear
+        #clear
         echo "${NUMBER}I searched for an available domain and found ${MENU}>>> $DOMAIN  <<<${END}${END}"
         read -r -p "Do you wish to use it (y/n)?" yn
         case $yn in
@@ -825,13 +825,13 @@ ubuntuDesktop() {
         esac
     fi
     NetBios=$(echo "$DOMAIN" | cut -d '.' -f1)
-    clear
+    #clear
     var=$(lsb_release -a | grep -i release | awk '{print $2}' | cut -d '.' -f1)
     if [ "$var" -eq "14" ]; then
         echo "Installing additional dependencies"
         sudo apt-get -qq install -y realmd sssd sssd-tools samba-common krb5-user
         sudo apt-get -qq install -f -y
-        clear
+        #clear
         echo "${INTRO_TEXT}Detecting Ubuntu $var${END}"
         sudo echo "${INTRO_TEXT}Realm=$DOMAIN${END}"
         echo "${INTRO_TEXT}Joining Ubuntu $var${END}"
@@ -846,7 +846,7 @@ ubuntuDesktop() {
     else
         if [ "$var" -eq "16" ]; then
             echo "${INTRO_TEXT}Detecting Ubuntu $var${END}"
-            clear
+            #clear
             sudo echo "${INTRO_TEXT}Realm=$DOMAIN${END}"
             echo "${INTRO_TEXT}Joining Ubuntu $var${END}"
             echo ""
@@ -861,7 +861,7 @@ ubuntuDesktop() {
             if [ "$var" -eq "17" ] || [ "$var" -eq "18" ] || [ "$var" -eq "19" ]; then
                 echo "${INTRO_TEXT}Detecting Ubuntu $var${END}"
                 sleep 1
-                clear
+                #clear
                 if [ "$var" -eq "19" ]; then
                     echo""
                     echo "fixing krb5.keytab: Bad encryption type for ubuntu 19.10"
@@ -884,7 +884,7 @@ ubuntuDesktop() {
                     exit
                 fi
             else
-                clear
+                #clear
                 sudo echo "${RED_TEXT}I am having issuers to detect your Ubuntu version${END}"
                 exit
             fi
@@ -900,17 +900,20 @@ ubuntuServer() {
     dhcpDomain=$(hostname -d)
 
     echo "${RED_TEXT}Installing packages do not abort!.......${END}"
-    sudo apt-get -qq install realmd adcli sssd -y
-    sudo apt-get -qq install ntp -y
-    sudo apt-get -qq install -y sssd-tools samba-common krb5-user
-    sudo apt-get -qq install -f -y
-    clear
+    sudo apt-get update -qq
+    sudo apt-get install -y \
+    krb5-user krb5-config \
+    sssd sssd-tools libpam-sss \
+    libnss-sss libsss-sudo \
+    libsasl2-modules-gssapi-mit \
+    realmd adcli policykit-1
+    #clear
     if ! sudo dpkg -l | grep realmd; then
-        clear
+        #clear
         echo "${RED_TEXT}Installing packages failed.. please check connection and dpkg and try again.${END}"
         exit
     else
-        clear
+        #clear
         echo "${INTRO_TEXT}packages installed${END}"
     fi
     sleep 1
@@ -920,12 +923,12 @@ ubuntuServer() {
     if ! ping -c 1 "$DOMAIN"; then
         DOMAIN=$(realm discover -v $(cat /etc/resolv.conf | grep -i ^search | sed -r 's/search //') | grep -i realm-name | awk '{print $2}')
         if ! ping -c 1 "$DOMAIN"; then
-            clear
+            #clear
             echo "${NUMBER}I searched for an available domain and found nothing, please type your domain manually below... ${END}"
             echo "Please enter the domain you wish to join:"
             read -r DOMAIN
         else
-            clear
+            #clear
             echo "${NUMBER}I searched for an available domain and found ${MENU}>>> $DOMAIN  <<<${END}${END}"
             read -r -p "Do you wish to use it (y/n)?" yn
             case $yn in
@@ -951,7 +954,86 @@ ubuntuServer() {
     echo "${NUMBER}Be sure to escape out all whitespaces, if applicable.${END}"
     read -r "Mysrvgroup"
     export Mysrvgroup
-    #Mysrvgroup=$(sed -En 's/^\\s/\\&/gp' <<< $Mysrvgroup )
+    if ! grep $(hostname -d) /etc/hosts; then #fix hosts file to have domain before joining
+        grep $(hostname -s) /etc/hosts
+        echo "Modifying..."
+        sed -Ei "s/($(hostname -s))/\1.$(hostname -d) \1/g" /etc/hosts
+        grep $(hostname -s) /etc/hosts
+    fi
+    kinit $DomainADMIN
+    echo "[sssd]
+        services = nss, pam, pac, ssh
+        config_file_version = 2
+        domains = ${DOMAIN^^}
+
+        [domain/${DOMAIN^^}]
+        id_provider = ad
+        access_provider = ad
+        auth_provider = ad
+        chpass_provider = ad
+        #ldap_schema = rfc2307bis
+        #ldap_schema = ad
+        ldap_idmap_autorid_compat = True
+        # Enumeration is discouraged for performance reasons.
+        # OMV needs True to show users in ui and acl
+        enumerate = True
+        use_fully_qualified_names = False
+        # timeout (integer)     #### The default value for this parameter is 10 seconds.
+        # This get the users in range to show in UI and ACL
+        ldap_idmap_range_min = 20000
+        # ldap_idmap_range_max = 60000    ### Does not seem to work
+        #                                ### Causes not able to start
+        # If unneeded users or other objects show.
+        # Use "dsquery user -name * "  to see on windows with powershell
+        #ldap_user_search_base = OU=SBSUsers,OU=Users,OU=MyBusiness,DC=example,DC=com
+        # ldap_user_search_base = CN=Users,DC=example,DC=com
+        # Use this if users are being logged in at /.  OMV does this. Otherwise not tested
+        # This example specifies /home/DOMAIN-FQDN/user as \$HOME.  Use with pam_mkhomedir.so
+        #override_homedir = /home/%u
+        #ldap_user_email = email  # Could this fill the email field? might not be in this version
+        #ldap_user_search_base = dc=example,dc=com
+        #ldap_group_search_base = dc=example,dc=com
+        #ldap_user_object_class = user
+        #ldap_user_name = sAMAccountName
+        #ldap_user_fullname = displayName                ### Seems to be maps to comment in OMV?
+        #ldap_user_home_directory = unixHomeDirectory
+        #ldap_user_principal = userPrincipalName
+        #ldap_group_object_class = group
+        #ldap_group_name = sAMAccountName                ### Seems to be maps to Name in OMV?
+        # Unused options
+        #ldap_idmap_default_domain = ${DOMAIN,,}
+        #ldap_id_mapping = True
+        #default_domain_suffix = ${DOMAIN,,}
+        #ldap_access_order = expire
+        #ldap_account_expire_policy = ad
+        #ldap_force_upper_case_realm = true
+        #ldap_user_search_base = dc=example,dc=com
+        #ldap_group_search_base = dc=example,dc=com
+        #ldap_user_object_class = user
+        #ldap_user_name = sAMAccountName
+        #ldap_user_fullname = displayName
+        #ldap_user_home_directory = unixHomeDirectory
+        #ldap_user_principal = userPrincipalName
+        #ldap_group_object_class = group
+        #ldap_group_name = sAMAccountName
+        # ldap_id_mapping = True
+        # Uncomment if the client machine hostname doesn't match the computer object on the DC.
+        # ad_hostname = mymachine.${DOMAIN^^}
+        # Uncomment if DNS SRV resolution is not working
+        # ad_server = dc.mydomain.${DOMAIN,,}
+        # Uncomment if the AD domain is named differently than the Samba domain
+        # ad_domain = ${DOMAIN,,}
+        # filter_groups =
+        # For other options see "man sssd.conf"
+        # https://jhrozek.wordpress.com/2015/03/11/anatomy-of-sssd-user-lookup/" >/etc/sssd/sssd.conf
+
+    if ! sudo net ads join -k; then
+        if ! sudo realm join -v -U "$DomainADMIN" "$DOMAIN" --install=/; then
+            echo "${RED_TEXT}AD join failed. Please check your errors with ${INTRO_TEXT}journalctl -xe${END}"
+            read -n 1 -s -r -p "Press any key to continue..."
+            exit
+        fi
+    fi
     fi_auth_new
 
 }
@@ -974,24 +1056,24 @@ kalijoin() {
     sudo apt-get -qq install realmd adcli sssd -y
     sudo apt-get -qq install ntp -y
     sudo apt-get -qq install -f -y
-    clear
+    #clear
     if ! sudo dpkg -l | grep realmd; then
-        clear
+        #clear
         sudo echo "${RED_TEXT}Installing packages failed.. please check connection ,dpkg and apt-get update then try again.${END}"
         exit
     else
-        clear
+        #clear
         sudo echo "${INTRO_TEXT}packages installed${END}"
     fi
     echo "hostname is $myhost"
     DOMAIN=$(realm discover | grep -i realm.name | awk '{print $2}')
     if ! ping -c 2 "$DOMAIN" >/dev/null; then
-        clear
+        #clear
         echo "${NUMBER}I searched for an available domain and found nothing, please type your domain manually below...${END}"
         echo "Please enter the domain you wish to join:"
         read -r DOMAIN
     else
-        clear
+        #clear
         echo "${NUMBER}I searched for an available domain and found $DOMAIN ${END}"
         read -r -p "Do you wish to use it (y/n)?" yn
         case $yn in
@@ -1008,7 +1090,7 @@ kalijoin() {
     echo ""
     echo "${INTRO_TEXT}Please type Admin user:${END}"
     read -r ADMIN
-    clear
+    #clear
     sudo echo "${INTRO_TEXT}Realm= $DOMAIN${END}"
     sudo echo "${NORMAL}${NORMAL}"
     if ! sudo realm join --verbose --user="$ADMIN" "$DOMAIN" --install=/; then
@@ -1041,23 +1123,25 @@ debianclient() {
             echo "$admins ALL=(ALL:ALL) ALL" | tee -a /etc/sudoers.d/admin
         fi
     fi
-    clear
+    #clear
     sudo echo "${RED_TEXT}Installing packages do not abort!.......${END}"
     sudo apt-get -qq update
-    sudo apt-get -qq install libsss-sudo -y
-    sudo apt-get -qq install realmd adcli sssd -y
-    sudo apt-get -qq install ntp -y
-    sudo apt-get -qq install policykit-1 -y
+    sudo apt-get install -y \
+    krb5-user krb5-config \
+    sssd sssd-tools libpam-sss \
+    libnss-sss libsss-sudo \
+    libsasl2-modules-gssapi-mit \
+    realmd adcli policykit-1
     sudo mkdir -p /var/lib/samba/private
     sudo apt-get install -f
-    clear
+    #clear
     if ! sudo dpkg -l | grep realmd; then
-        clear
+        #clear
         sudo echo "${RED_TEXT}Installing packages failed.. please check connection, dpkg and apt-get update then try again.${END}"
         exit
     else
-        clear
-        sudo echo "${INTRO_TEXT}packages installed${END}"
+        #clear
+        sudo echo "${INTRO_TEXT}Packages installed${END}"
     fi
 
     if dpkg -l | grep openmediavault; then
@@ -1072,12 +1156,12 @@ debianclient() {
     if ! ping -c 1 "$DOMAIN"; then
         DOMAIN=$(realm discover -v $(cat /etc/resolv.conf | grep -i ^search | sed -r 's/search //') | grep -i realm-name | awk '{print $2}')
         if ! ping -c 1 "$DOMAIN"; then
-            clear
+            #clear
             echo "${NUMBER}I searched for an available domain and found nothing, please type your domain manually below... ${END}"
             echo "Please enter the domain you wish to join:"
             read -r DOMAIN
         else
-            clear
+            #clear
             echo "${NUMBER}I searched for an available domain and found ${MENU}>>> $DOMAIN  <<<${END}${END}"
             read -r -p "Do you wish to use it (y/n)?" yn
             case $yn in
@@ -1095,12 +1179,95 @@ debianclient() {
     echo ""
     echo "${INTRO_TEXT}Please type a Domain Admin user:${END}"
     read -r DomainADMIN
-    clear
+    #clear
     echo "${INTRO_TEXT}Realm= $DOMAIN${END}"
     echo "${NORMAL}${NORMAL}"
-    if ! sudo realm join -v -U "$DomainADMIN" "$DOMAIN" --install=/; then
-        echo "${RED_TEXT}AD join failed. Please check your errors with ${INTRO_TEXT}journalctl -xe${END}"
-        exit
+
+    #if ! sudo realm join -v -U "$DomainADMIN" "$DOMAIN" --install=/; then
+    if ! grep $(hostname -d) /etc/hosts; then #fix hosts file to have domain before joining
+        grep $(hostname -s) /etc/hosts
+        echo "Modifying..."
+        sed -Ei "s/($(hostname -s))/\1.$(hostname -d) \1/g" /etc/hosts
+        grep $(hostname -s) /etc/hosts
+    fi
+    echo "${NORMAL}Please type group name in AD for admins${END}"
+    echo "${NUMBER}Be sure to escape out all whitespaces, if applicable.${END}"
+    read -r "Mysrvgroup"
+    export Mysrvgroup
+
+    kinit $DomainADMIN
+    echo "[sssd]
+        services = nss, pam, pac, ssh
+        config_file_version = 2
+        domains = ${DOMAIN^^}
+
+        [domain/${DOMAIN^^}]
+        id_provider = ad
+        access_provider = ad
+        auth_provider = ad
+        chpass_provider = ad
+        #ldap_schema = rfc2307bis
+        #ldap_schema = ad
+        ldap_idmap_autorid_compat = True
+        # Enumeration is discouraged for performance reasons.
+        # OMV needs True to show users in ui and acl
+        enumerate = True
+        use_fully_qualified_names = False
+        # timeout (integer)     #### The default value for this parameter is 10 seconds.
+        # This get the users in range to show in UI and ACL
+        ldap_idmap_range_min = 20000
+        # ldap_idmap_range_max = 60000    ### Does not seem to work
+        #                                ### Causes not able to start
+        # If unneeded users or other objects show.
+        # Use "dsquery user -name * "  to see on windows with powershell
+        #ldap_user_search_base = OU=SBSUsers,OU=Users,OU=MyBusiness,DC=example,DC=com
+        # ldap_user_search_base = CN=Users,DC=example,DC=com
+        # Use this if users are being logged in at /.  OMV does this. Otherwise not tested
+        # This example specifies /home/DOMAIN-FQDN/user as \$HOME.  Use with pam_mkhomedir.so
+        #override_homedir = /home/%u
+        #ldap_user_email = email  # Could this fill the email field? might not be in this version
+        #ldap_user_search_base = dc=example,dc=com
+        #ldap_group_search_base = dc=example,dc=com
+        #ldap_user_object_class = user
+        #ldap_user_name = sAMAccountName
+        #ldap_user_fullname = displayName                ### Seems to be maps to comment in OMV?
+        #ldap_user_home_directory = unixHomeDirectory
+        #ldap_user_principal = userPrincipalName
+        #ldap_group_object_class = group
+        #ldap_group_name = sAMAccountName                ### Seems to be maps to Name in OMV?
+        # Unused options
+        #ldap_idmap_default_domain = ${DOMAIN,,}
+        #ldap_id_mapping = True
+        #default_domain_suffix = ${DOMAIN,,}
+        #ldap_access_order = expire
+        #ldap_account_expire_policy = ad
+        #ldap_force_upper_case_realm = true
+        #ldap_user_search_base = dc=example,dc=com
+        #ldap_group_search_base = dc=example,dc=com
+        #ldap_user_object_class = user
+        #ldap_user_name = sAMAccountName
+        #ldap_user_fullname = displayName
+        #ldap_user_home_directory = unixHomeDirectory
+        #ldap_user_principal = userPrincipalName
+        #ldap_group_object_class = group
+        #ldap_group_name = sAMAccountName
+        # ldap_id_mapping = True
+        # Uncomment if the client machine hostname doesn't match the computer object on the DC.
+        # ad_hostname = mymachine.${DOMAIN^^}
+        # Uncomment if DNS SRV resolution is not working
+        # ad_server = dc.mydomain.${DOMAIN,,}
+        # Uncomment if the AD domain is named differently than the Samba domain
+        # ad_domain = ${DOMAIN,,}
+        # filter_groups =
+        # For other options see "man sssd.conf"
+        # https://jhrozek.wordpress.com/2015/03/11/anatomy-of-sssd-user-lookup/" >/etc/sssd/sssd.conf
+
+    if ! sudo net ads join -k; then
+        if ! sudo realm join -v -U "$DomainADMIN" "$DOMAIN" --install=/; then
+            echo "${RED_TEXT}AD join failed. Please check your errors with ${INTRO_TEXT}journalctl -xe${END}"
+            read -n 1 -s -r -p "Press any key to continue..."
+            exit
+        fi
     fi
     fi_auth_new
 }
@@ -1115,14 +1282,14 @@ CentOS() {
     DOMAIN=$(realm discover | grep -i realm-name | awk '{print $2}')
     if [ -n "$DOMAIN" ]; then
         if ! ping -c 1 "$DOMAIN"; then
-            clear
+            #clear
             echo "I searched for an available domain and found $DOMAIN but it is not responding to ping, please type your domain manually below... "
             echo "Please enter the domain you wish to join:"
             read -r DOMAIN
             echo "I Please enter AD admin user "
             read -r ADMIN
         else
-            clear
+            #clear
             echo "I searched for an available domain and found >>> $DOMAIN  <<<"
             read -r -p "Do you wish to use it (y/n)?" yn
             case $yn in
@@ -1141,7 +1308,7 @@ CentOS() {
             esac
         fi
     else
-        clear
+        #clear
         echo "I searched for an available domain and found nothing, please type your domain manually below... "
         echo "Please enter the domain you wish to join:"
         read -r DOMAIN
@@ -1166,7 +1333,7 @@ raspberry() {
     sudo mkdir -p /var/lib/samba/private
     sudo aptitude install libsss-sudo
     sudo systemctl enable sssd
-    clear
+    #clear
     DOMAIN=$(realm discover | grep -i realm-name | awk '{print $2}')
     echo ""
     echo "please type Domain admin"
@@ -1205,14 +1372,14 @@ Fedora_fn() {
     yum -y install realmd sssd oddjob oddjob-mkhomedir adcli samba-common-tools samba-common
     DOMAIN=$(realm discover | grep -i realm-name | awk '{print $2}')
     if ! ping -c 1 "$DOMAIN"; then
-        clear
+        #clear
         echo "I searched for an available domain and found nothing, please type your domain manually below... "
         echo "Please enter the domain you wish to join:"
         read -r DOMAIN
         echo "I Please enter AD admin user "
         read -r ADMIN
     else
-        clear
+        #clear
         echo "I searched for an available domain and found >>> $DOMAIN  <<<"
         read -r -p "Do you wish to use it (y/n)?" yn
         case $yn in
@@ -1225,7 +1392,7 @@ Fedora_fn() {
         *) echo 'Please answer yes or no.' ;;
         esac
     fi
-    clear
+    #clear
     sudo echo "Please enter AD admin user:"
     read -r ADMIN
     sudo echo "Realm= $DOMAIN"
@@ -1248,12 +1415,12 @@ LinuxMint() {
     echo "Looking for Realms.. please wait"
     DOMAIN=$(realm discover | grep -i realm.name | awk '{print $2}')
     if ! ping -c 2 "$DOMAIN" >/dev/null; then
-        clear
+        #clear
         echo "${NUMBER}I searched for an available domain and found nothing, please type your domain manually below... ${END}"
         echo "Please enter the domain you wish to join:"
         read -r DOMAIN
     else
-        clear
+        #clear
         echo "${NUMBER}I searched for an available domain and found ${MENU}>>> $DOMAIN  <<<${END}${END}"
         read -r -p "Do you wish to use it (y/n)?" yn
         case $yn in
@@ -1266,12 +1433,12 @@ LinuxMint() {
         *) echo 'Please answer yes or no.' ;;
         esac
     fi
-    clear
+    #clear
     echo "${INTRO_TEXT}Please log in with domain admin to $DOMAIN to connect${END}"
     echo "${INTRO_TEXT}Please type Admin user:${END}"
     read -r ADMIN
     NetBios=$(echo "$DOMAIN" | cut -d '.' -f1)
-    clear
+    #clear
     if ! sudo realm join --verbose --user="$ADMIN" "$DOMAIN"; then
         echo "${RED_TEXT}AD join failed.please check your errors with journalctl -xe${END}"
         exit
@@ -1288,7 +1455,7 @@ LinuxMint() {
 
 ############################### Update to Realmd from likewise ##################
 Realmdupdate() {
-    clear
+    #clear
     echo ""
     echo "this section has been deprecated, If you are still using likewise please see code"
     echo "leave likewise with sudo domainjoin-cli leave"
@@ -1297,7 +1464,7 @@ Realmdupdate() {
 
 ############################### Fail check ####################################
 failcheck() {
-    clear
+    #clear
     export HOSTNAME
     myhost=$(hostname | cut -d '.' -f1)
     if ! hostname | cut -d '.' -f1 </dev/null >/dev/null 2>&1; then
@@ -1350,7 +1517,7 @@ failcheck() {
 
 ############################### Fail check Yum ####################################
 failcheck_yum() {
-    clear
+    #clear
     export HOSTNAME
     myhost=$(hostname | cut -d '.' -f1)
     if ! hostname | cut -d '.' -f1 </dev/null >/dev/null 2>&1; then
@@ -1420,7 +1587,7 @@ ldaplook() {
     echo "${NUMBER}your BASE will be the area you will search in${END}"
     sleep 3
     if [ "$ldaptools" = dap-uti ]; then
-        clear
+        #clear
         echo "ldap tool installed.. trying to find this host"
         sudo ldapsearch -x cn="$myhost"
         echo "Please type what you are looking for"
@@ -1428,7 +1595,7 @@ ldaplook() {
         sudo ldapsearch -x | grep -i "$own"
         exit
     else
-        clear
+        #clear
         if ! sudo apt-get install ldap-utils -y; then
             echo "install failed"
             exit
@@ -1520,7 +1687,7 @@ Reauthenticate() {
 leaves() {
     export HOSTNAME
     myhost=$(hostname | cut -d '.' -f1)
-    clear
+    #clear
     LEFT=$(sudo realm list | grep configured | awk '{print $2}') </dev/null >/dev/null 2>&1
     DOMAIN=$(realm list | grep -i realm.name | awk '{print $2}') </dev/null >/dev/null 2>&1
     SSSD=$(sudo cat /etc/sssd/sssd.conf | grep domain | awk '{print $3}' | head -1) </dev/null >/dev/null 2>&1
@@ -1584,7 +1751,7 @@ leaves() {
 
 ################################## info ##################################
 readmes() {
-    clear
+    #clear
     echo "Usage: sh ADconnection.sh [--help] "
     echo "                          [-d (ubuntu debug mode)]"
     echo "                          [-j admin domain (Simple direct join) ADconnection -j ADadmin domain"
@@ -1620,7 +1787,7 @@ readmes() {
 
 ############################### Menu ###############################
 MENU_FN() {
-    clear
+    #clear
     echo "${INTRO_TEXT}   Active directory connection tool             ${END}"
     echo "${INTRO_TEXT}       Created by Pierre Goude                  ${END}"
     echo "${INTRO_TEXT} This script will edit several critical files.. ${END}"
@@ -1640,28 +1807,28 @@ MENU_FN() {
         else
             case $opt in
             1)
-                clear
+                #clear
                 echo "Installing on Linux Client/Server"
                 linuxclient
                 ;;
 
             2)
-                clear
+                #clear
                 echo "Check for errors"
                 failcheck
                 ;;
             3)
-                clear
+                #clear
                 echo "Check in Ldap"
                 ldaplook
                 ;;
             4)
-                clear
+                #clear
                 echo "Rejoin to AD"
                 Reauthenticate
                 ;;
             5)
-                clear
+                #clear
                 echo "Leave domain"
                 leaves
                 ;;
@@ -1672,7 +1839,7 @@ MENU_FN() {
                 exit
                 ;;
             *)
-                clear
+                #clear
                 opt "Pick an option from the menu"
                 MENU_FN
                 ;;
@@ -1683,7 +1850,7 @@ MENU_FN() {
 
 ############################### Menu YUM ###############################
 YUM_MENU() {
-    clear
+    #clear
     echo "  Active directory connection tool             "
     echo "      Created by Pierre Goude                 "
     echo " This script will edit several critical files.. "
@@ -1703,27 +1870,27 @@ YUM_MENU() {
         else
             case $opt in
             1)
-                clear
+                #clear
                 echo "Installing on Linux Client/Server"
                 linuxclient
                 ;;
             2)
-                clear
+                #clear
                 echo "Check for errors"
                 failcheck_yum
                 ;;
             3)
-                clear
+                #clear
                 echo "Check in Ldap"
                 ldaplook
                 ;;
             4)
-                clear
+                #clear
                 echo "Rejoin to AD"
                 Reauthenticate
                 ;;
             5)
-                clear
+                #clear
                 echo "Leave domain"
                 leave
                 ;;
@@ -1734,7 +1901,7 @@ YUM_MENU() {
                 exit
                 ;;
             *)
-                clear
+                #clear
                 opt "Pick an option from the menu"
                 MENU_FN
                 ;;
@@ -1753,7 +1920,7 @@ PRECHECK_FN() {
     fi
 }
 ############################## Flags ###############################
-clear
+#clear
 #Versi0n=$( echo "7" )
 #update=$( curl -s https://github.com/PierreGode/Linux-Active-Directory-join-script/blob/master/ADconnection.sh | grep -i Versi0n | awk '{print $10}' )
 #if [ "$update" -gt "$Version" ]
@@ -1801,7 +1968,7 @@ while test $# -gt 0; do
     -s | --s)
         if test $# -gt 0; then
             if ! realm discover </dev/null >/dev/null 2>&1; then
-                clear
+                #clear
                 echo ""
                 echo "realmd is not installed"
                 echo ""
@@ -1817,7 +1984,7 @@ while test $# -gt 0; do
         ;;
     -u | --u)
         if test $# -gt 0; then
-            clear
+            #clear
             export HOSTNAME
             myhost=$(hostname | cut -d '.' -f1)
             DOMAIN=$(realm discover | grep -i realm.name | awk '{print $2}' | tr "[:upper:]" "[:lower:]")
@@ -1862,30 +2029,30 @@ while test $# -gt 0; do
             fi
             export HOSTNAME
             myhost=$(hostname | cut -d '.' -f1)
-            clear
+            #clear
             sudo echo "${RED_TEXT}Installing packages do no abort!.......${END}"
             sudo apt-get -qq install realmd adcli sssd -y
             sudo apt-get -qq install ntp -y
             sudo apt-get install -f -y
-            clear
+            #clear
             if ! sudo dpkg -l | grep realmd; then
-                clear
+                #clear
                 sudo echo "${RED_TEXT}Installing packages failed.. please check connection ,dpkg and apt-get update then try again.${END}"
                 exit
             else
-                clear
+                #clear
                 sudo echo "${INTRO_TEXT}packages installed${END}"
             fi
             echo "hostname is $myhost"
             echo "Looking for Realms.. please wait"
             DOMAIN=$(realm discover | grep -i realm.name | awk '{print $2}')
             if ! ping -c 2 "$DOMAIN" >/dev/null; then
-                clear
+                #clear
                 echo "${NUMBER}I searched for an available domain and found nothing, please type your domain manually below...${END}"
                 echo "Please enter the domain you wish to join:"
                 read -r DOMAIN
             else
-                clear
+                #clear
                 echo "${NUMBER}I searched for an available domain and found ${MENU}>>> $DOMAIN  <<<${END}${END}"
                 read -r -p "Do you wish to use it (y/n)?" yn
                 case $yn in
@@ -1899,13 +2066,13 @@ while test $# -gt 0; do
                 esac
             fi
             NetBios=$(echo "$DOMAIN" | cut -d '.' -f1)
-            clear
+            #clear
             var=$(lsb_release -a | grep -i release | awk '{print $2}' | cut -d '.' -f1)
             if [ "$var" -eq "14" ]; then
                 echo "Installing additional dependencies"
                 sudo apt-get -qq install -y realmd sssd sssd-tools samba-common krb5-user
                 sudo apt-get install -f -y
-                clear
+                #clear
                 echo "${INTRO_TEXT}Detecting Ubuntu $var${END}"
                 sudo echo "${INTRO_TEXT}Realm=$DOMAIN${END}"
                 echo "${INTRO_TEXT}Joining Ubuntu $var${END}"
@@ -1920,7 +2087,7 @@ while test $# -gt 0; do
             else
                 if [ "$var" -eq "16" ]; then
                     echo "${INTRO_TEXT}Detecting Ubuntu $var${END}"
-                    clear
+                    #clear
                     sudo echo "${INTRO_TEXT}Realm=$DOMAIN${END}"
                     echo "${INTRO_TEXT}Joining Ubuntu $var${END}"
                     echo ""
@@ -1935,7 +2102,7 @@ while test $# -gt 0; do
                     if [ "$var" -eq "17" ] || [ "$var" -eq "18" ] || [ "$var" -eq "19" ]; then
                         echo "${INTRO_TEXT}Detecting Ubuntu $var${END}"
                         sleep 1
-                        clear
+                        #clear
                         if [ "$var" -eq "19" ]; then
                             echo "fixing krb5.keytab: Bad encryption type for ubuntu 19.10"
                             sudo add-apt-repository ppa:aroth/ppa
@@ -1953,7 +2120,7 @@ while test $# -gt 0; do
                             exit
                         fi
                     else
-                        clear
+                        #clear
                         sudo echo "${RED_TEXT}I am having issues detecting your Ubuntu version${END}"
                         exit
                     fi
