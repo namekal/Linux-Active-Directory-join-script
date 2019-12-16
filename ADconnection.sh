@@ -947,8 +947,8 @@ ubuntuServer() {
     echo "${INTRO_TEXT}Please type a Domain Admin user:${END}"
     read -r DomainADMIN
     #if ! sudo realm join -v -U "$DomainADMIN" "$DOMAIN" --install=/; then
-        echo "${RED_TEXT}AD join failed. Please check your errors with ${INTRO_TEXT}journalctl -xe${END}"
-        exit
+    #    echo "${RED_TEXT}AD join failed. Please check your errors with ${INTRO_TEXT}journalctl -xe${END}"
+    #    exit
     #fi
     if ! grep $(hostname -d) /etc/hosts; then #fix hosts file to have domain before joining
         if grep $(hostname -s) /etc/hosts; then
