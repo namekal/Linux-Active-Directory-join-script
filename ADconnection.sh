@@ -970,7 +970,7 @@ ubuntuServer() {
                 echo -e "Please enter the domain you wish to join:"
                 read -r DOMAIN
                 ;;
-            *) echo -e 'Please answer yes or no.' ;;
+            *) echo -e 'Please answer [y]es or [n]o.' ;;
             esac
         fi
     fi
@@ -1016,7 +1016,7 @@ idmap config *:range = 85000-86000\n"
         printf "${sambaConf}" | tee -a /etc/samba/conf.d/ADJoinScript.conf
     fi
 
-    echo -e "${NORMAL}Please type group name in AD for admins${END}"
+    echo -e "${COL_CYAN}Please type group name in AD for admins${END}"
     echo -e "${NUMBER}Be sure to escape out all whitespaces, if applicable.${END}"
     read -r "Mysrvgroup"
     export Mysrvgroup
@@ -1043,6 +1043,7 @@ ldap_idmap_range_min = 20000" >/etc/sssd/sssd.conf
         #if ! sudo realm join -v -U "$DomainADMIN" "$DOMAIN" --install=/; then
         err "AD join failed. Please check your errors with \"journalctl -xe\""
         read -n 1 -s -r -p "Press any key to continue..."
+        echo ""
         exit
         #fi
     fi
