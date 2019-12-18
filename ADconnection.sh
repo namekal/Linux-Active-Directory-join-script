@@ -983,7 +983,6 @@ ubuntuServer() {
     #    exit
     #fi
     read -p "Enter the desired full subdomain for this client:" clientSubDomain
-
     if ! grep -i $DOMAIN /etc/hosts; then #fix hosts file to have domain before joining
         if grep $(hostname -s) /etc/hosts; then
             grep $(hostname -s) /etc/hosts
@@ -995,6 +994,7 @@ ubuntuServer() {
             grep "127.0.1.1" /etc/hosts
         fi
     fi
+    domainUpper="${DOMAIN^^}"
     if [ ! -f /etc/samba/smb.conf ]; then
         printf -v sambaConf "[global]\n\
 workgroup = "${DOMAIN%.*}"\n\
