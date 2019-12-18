@@ -1010,10 +1010,10 @@ idmap config "${domainUpper%.*}" : range = 1000-999999999999\n\
 idmap config *:backend = tdb\n\
 idmap config *:range = 85000-86000\n"
 
-        printf "${sambaConf}" | tee -a /etc/samba/smb.conf
+        printf "${sambaConf}" >>/etc/samba/smb.conf
     else
         mkdir -p /etc/samba/conf.d
-        printf "${sambaConf}" | tee -a /etc/samba/conf.d/ADJoinScript.conf
+        printf "${sambaConf}" >>/etc/samba/conf.d/ADJoinScript.conf
     fi
 
     echo -e "${COL_CYAN}Please type group name in AD for admins${END}"
