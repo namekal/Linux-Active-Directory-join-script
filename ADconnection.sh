@@ -988,7 +988,7 @@ ubuntuServer() {
         if grep $(hostname -s) /etc/hosts; then
             grep $(hostname -s) /etc/hosts
             echo -e "Modifying..."
-            sed -Ei "s/($(hostname -s))/\1.${clientSubDomain:-${DOMAIN,,}} \1/g" /etc/hosts
+            sed -Ei "s/($(hostname -s))/\1.${DOMAIN,,} \1/g" /etc/hosts
             grep $(hostname -s) /etc/hosts
         elif ! grep "127.0.1.1" /etc/hosts; then
             echo -e "127.0.1.1         $(hostname -s).${clientSubDomain:-${DOMAIN,,}} $(hostname -s)" >>/etc/hosts
