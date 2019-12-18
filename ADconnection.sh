@@ -927,9 +927,9 @@ ubuntuDesktop() {
 ####################### Setup for Ubuntu server #######################################
 ubuntuServer() {
     export HOSTNAME
+    set -x
     myhost=$(hostname | cut -d '.' -f1)
     dhcpDomain=$(hostname -d)
-    domainUpper="${DOMAIN^^}"
 
     echo -e "${RED_TEXT}Installing packages do not abort!.......${END}"
     sudo apt-get update -qq
@@ -1861,7 +1861,7 @@ MENU_FN() {
                 ;;
             *)
                 #clear
-                opt "Pick an option from the menu"
+                echo "Pick an option from the menu"
                 MENU_FN
                 ;;
             esac
