@@ -1014,7 +1014,7 @@ idmap config *:range = 85000-86000\n"
     else
         mkdir -p /etc/samba/conf.d
         mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
-        printf "${sambaConf}" >/etc/samba/smd.conf
+        printf "${sambaConf}" >/etc/samba/smb.conf
     fi
 
     echo -e "${COL_CYAN}Please type group name in AD for admins${END}"
