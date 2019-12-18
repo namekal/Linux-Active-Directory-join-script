@@ -997,16 +997,16 @@ ubuntuServer() {
     domainUpper="${DOMAIN^^}"
     if [ ! -f /etc/samba/smb.conf ]; then
         printf -v sambaConf "[global]\n\
-workgroup = "${DOMAIN%.*}"\n\
-realm = "${DOMAIN}"\n\
+workgroup = \"${DOMAIN%.*}\"\n\
+realm = \"${DOMAIN}\"\n\
 security = ads\n\
 client signing = yes\n\
 client use spnego = yes\n\
 kerberos method = secrets and keytab\n\
 obey pam restrictions = yes\n\
 protocol = SMB3\n\
-idmap config "${domainUpper%.*}" : backend  = rid\n\
-idmap config "${domainUpper%.*}" : range = 1000-999999999999\n\
+idmap config \"${domainUpper%.*}\" : backend  = rid\n\
+idmap config \"${domainUpper%.*}\" : range = 1000-999999999999\n\
 idmap config *:backend = tdb\n\
 idmap config *:range = 85000-86000\n"
 
