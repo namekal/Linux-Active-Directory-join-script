@@ -18,12 +18,29 @@
 #support added for ubutnu 19.04 2019-11-11
 
 # ~~~~~~~~~~  Environment Setup ~~~~~~~~~~ #
+err() {
+    echo -e "${COL_YELLOW}[$(date +'%Y-%m-%dT%H:%M:%S%z')] ${UNDERLINE}${COL_RED}ERR${COL_RESET}:  $@" >&2
+}
+
+# Colors
+ESC_SEQ="\x1b["
+COL_RESET=$ESC_SEQ"39;49;00m"
+COL_RED=$ESC_SEQ"31;01m"
+COL_GREEN=$ESC_SEQ"32;01m"
+COL_YELLOW=$ESC_SEQ"33;01m"
+COL_BLUE=$ESC_SEQ"34;01m"
+COL_MAGENTA=$ESC_SEQ"35;01m"
+COL_CYAN=$ESC_SEQ"36;01m"
+BG_GREY=$ESC_SEQ"6;01m"
+UNDERLINE=$ESC_SEQ"4;01m"
+
 NORMAL=$(printf "\033[m")
-MENU=$(printf "\033[36m")
-NUMBER=$(printf "\033[33m")
-RED_TEXT=$(printf "\033[31m")
-INTRO_TEXT=$(printf "\033[32m")
-END=$(printf "\033[0m")
+MENU=$COL_CYAN
+NUMBER=$COL_YELLOW    #
+RED_TEXT=$COL_RED     #Red
+INTRO_TEXT=$COL_GREEN #Green
+END=$COL_RESET        #reset
+
 # ~~~~~~~~~~  Environment Setup ~~~~~~~~~~ #
 
 ################################ fix errors # funktion not called ################
@@ -664,6 +681,20 @@ linuxclient() {
     rasp=$(lsb_release -a | grep -i Distributor | awk '{print $3}') </dev/null >/dev/null 2>&1
     kalilinux=$(lsb_release -a | grep -i Distributor | awk '{print $3}') </dev/null >/dev/null 2>&1
 
+    printf -v sambaConf "[global]\n\
+workgroup = "${DOMAIN%.*}"\n\
+realm = "${DOMAIN}"\n\
+security = ads\n\
+client signing = yes\n\
+client use spnego = yes\n\
+kerberos method = secrets and keytab\n\
+obey pam restrictions = yes\n\
+protocol = SMB3\n\
+idmap config "${domainUpper%.*}" : backend  = rid\n\
+idmap config "${domainUpper%.*}" : range = 1000-999999999999\n\
+idmap config *:backend = tdb\n\
+idmap config *:range = 85000-86000\n"
+
     #### OS detection ####
     case $TheOS in
     Fedora)
@@ -898,6 +929,7 @@ ubuntuServer() {
     export HOSTNAME
     myhost=$(hostname | cut -d '.' -f1)
     dhcpDomain=$(hostname -d)
+    domainUpper="${DOMAIN^^}"
 
     echo "${RED_TEXT}Installing packages do not abort!.......${END}"
     sudo apt-get update -qq
@@ -910,7 +942,7 @@ ubuntuServer() {
     #clear
     if ! sudo dpkg -l | grep realmd; then
         #clear
-        echo "${RED_TEXT}Installing packages failed.. please check connection and dpkg and try again.${END}"
+        err "Installing packages failed.. please check connection and dpkg and try again."
         exit
     else
         #clear
@@ -929,10 +961,10 @@ ubuntuServer() {
             read -r DOMAIN
         else
             #clear
-            echo "${NUMBER}I searched for an available domain and found ${MENU}>>> $DOMAIN  <<<${END}${END}"
+            echo "${NUMBER}I searched for an available domain and found ${MENU}>>> ${DOMAIN}  <<<${END}${END}"
             read -r -p "Do you wish to use it (y/n)?" yn
             case $yn in
-            [Yy]*) echo "${INTRO_TEXT}Please log in with domain admin access to $DOMAIN to connect${END}" ;;
+            [Yy]*) echo "${INTRO_TEXT}Please log in with domain admin access to ${DOMAIN} to connect${END}" ;;
 
             [Nn]*)
                 echo "Please enter the domain you wish to join:"
@@ -942,7 +974,7 @@ ubuntuServer() {
             esac
         fi
     fi
-    echo "${INTRO_TEXT}Realm: $DOMAIN${END}"
+    echo "${INTRO_TEXT}Realm: ${DOMAIN}${END}"
     echo "${NORMAL}${NORMAL}"
     echo "${INTRO_TEXT}Please type a Domain Admin user:${END}"
     read -r DomainADMIN
@@ -950,6 +982,8 @@ ubuntuServer() {
     #    echo "${RED_TEXT}AD join failed. Please check your errors with ${INTRO_TEXT}journalctl -xe${END}"
     #    exit
     #fi
+    #read -p "Enter the desired full subdomain for this client:" clientSubDomain
+
     if ! grep -i $DOMAIN /etc/hosts; then #fix hosts file to have domain before joining
         if grep $(hostname -s) /etc/hosts; then
             grep $(hostname -s) /etc/hosts
@@ -961,7 +995,26 @@ ubuntuServer() {
             grep "127.0.1.1" /etc/hosts
         fi
     fi
-    sed -Ei "s/standalone server/member server/g" /etc/samba/smb.conf
+    if [ ! -f /etc/samba/smb.conf ]; then
+        printf -v sambaConf "[global]\n\
+workgroup = "${DOMAIN%.*}"\n\
+realm = "${DOMAIN}"\n\
+security = ads\n\
+client signing = yes\n\
+client use spnego = yes\n\
+kerberos method = secrets and keytab\n\
+obey pam restrictions = yes\n\
+protocol = SMB3\n\
+idmap config "${domainUpper%.*}" : backend  = rid\n\
+idmap config "${domainUpper%.*}" : range = 1000-999999999999\n\
+idmap config *:backend = tdb\n\
+idmap config *:range = 85000-86000\n"
+
+        printf "${sambaConf}" | tee -a /etc/samba/smb.conf
+    else
+        printf "${sambaConf}" | tee -a /etc/samba/conf.d/ADJoinScript.conf
+    fi
+
     echo "${NORMAL}Please type group name in AD for admins${END}"
     echo "${NUMBER}Be sure to escape out all whitespaces, if applicable.${END}"
     read -r "Mysrvgroup"
@@ -969,75 +1022,25 @@ ubuntuServer() {
 
     kinit $DomainADMIN
     echo "[sssd]
-        services = nss, pam, pac, ssh
-        config_file_version = 2
-        domains = ${DOMAIN^^}
+services = nss, pam, pac, ssh
+config_file_version = 2
+domains = ${DOMAIN^^}
 
-        [domain/${DOMAIN^^}]
-        id_provider = ad
-        access_provider = ad
-        auth_provider = ad
-        chpass_provider = ad
-        #ldap_schema = rfc2307bis
-        #ldap_schema = ad
-        ldap_idmap_autorid_compat = True
-        # Enumeration is discouraged for performance reasons.
-        # OMV needs True to show users in ui and acl
-        enumerate = True
-        use_fully_qualified_names = False
-        # timeout (integer)     #### The default value for this parameter is 10 seconds.
-        # This get the users in range to show in UI and ACL
-        ldap_idmap_range_min = 20000
-        # ldap_idmap_range_max = 60000    ### Does not seem to work
-        #                                ### Causes not able to start
-        # If unneeded users or other objects show.
-        # Use "dsquery user -name * "  to see on windows with powershell
-        #ldap_user_search_base = OU=SBSUsers,OU=Users,OU=MyBusiness,DC=example,DC=com
-        # ldap_user_search_base = CN=Users,DC=example,DC=com
-        # Use this if users are being logged in at /.  OMV does this. Otherwise not tested
-        # This example specifies /home/DOMAIN-FQDN/user as \$HOME.  Use with pam_mkhomedir.so
-        #override_homedir = /home/%u
-        #ldap_user_email = email  # Could this fill the email field? might not be in this version
-        #ldap_user_search_base = dc=example,dc=com
-        #ldap_group_search_base = dc=example,dc=com
-        #ldap_user_object_class = user
-        #ldap_user_name = sAMAccountName
-        #ldap_user_fullname = displayName                ### Seems to be maps to comment in OMV?
-        #ldap_user_home_directory = unixHomeDirectory
-        #ldap_user_principal = userPrincipalName
-        #ldap_group_object_class = group
-        #ldap_group_name = sAMAccountName                ### Seems to be maps to Name in OMV?
-        # Unused options
-        #ldap_idmap_default_domain = ${DOMAIN,,}
-        #ldap_id_mapping = True
-        #default_domain_suffix = ${DOMAIN,,}
-        #ldap_access_order = expire
-        #ldap_account_expire_policy = ad
-        #ldap_force_upper_case_realm = true
-        #ldap_user_search_base = dc=example,dc=com
-        #ldap_group_search_base = dc=example,dc=com
-        #ldap_user_object_class = user
-        #ldap_user_name = sAMAccountName
-        #ldap_user_fullname = displayName
-        #ldap_user_home_directory = unixHomeDirectory
-        #ldap_user_principal = userPrincipalName
-        #ldap_group_object_class = group
-        #ldap_group_name = sAMAccountName
-        # ldap_id_mapping = True
-        # Uncomment if the client machine hostname doesn't match the computer object on the DC.
-        # ad_hostname = mymachine.${DOMAIN^^}
-        # Uncomment if DNS SRV resolution is not working
-        # ad_server = dc.mydomain.${DOMAIN,,}
-        # Uncomment if the AD domain is named differently than the Samba domain
-        # ad_domain = ${DOMAIN,,}
-        # filter_groups =
-        # For other options see "man sssd.conf"
-        # https://jhrozek.wordpress.com/2015/03/11/anatomy-of-sssd-user-lookup/" >/etc/sssd/sssd.conf
+[domain/${DOMAIN^^}]
+id_provider = ad
+access_provider = ad
+auth_provider = ad
+chpass_provider = ad
+ldap_idmap_autorid_compat = True
+enumerate = True
+use_fully_qualified_names = False
+ldap_idmap_range_min = 20000" >/etc/sssd/sssd.conf
+
     chmod 0600 /etc/sssd/sssd.conf
 
     if ! sudo net ads join -k; then
         #if ! sudo realm join -v -U "$DomainADMIN" "$DOMAIN" --install=/; then
-        echo "${RED_TEXT}AD join failed. Please check your errors with ${INTRO_TEXT}journalctl -xe${END}"
+        err "AD join failed. Please check your errors with \"journalctl -xe\""
         read -n 1 -s -r -p "Press any key to continue..."
         exit
         #fi
@@ -1641,7 +1644,7 @@ Reauthenticate() {
         LEFT=$(sudo realm list | grep configured | awk '{print $2}')
         DOMAIN=$(realm list | grep -i realm.name | awk '{print $2}')
         SSSD=$(sudo grep domain /etc/sssd/sssd.conf | awk '{print $3}' | head -1)
-        DOMAINlower=$(echo "$DOMAIN" | tr '[:upper:]' '[:lower:]')
+        DOMAINlower="${DOMAIN,,}"
         if [ -n "$DOMAIN" ] || [ -n "$SSSD" ]; then
             if [ "$DOMAINlower" = "$SSSD" ]; then
                 echo "Detecting realm $SSSD"
