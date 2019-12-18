@@ -982,16 +982,16 @@ ubuntuServer() {
     #    echo -e "${RED_TEXT}AD join failed. Please check your errors with ${INTRO_TEXT}journalctl -xe${END}"
     #    exit
     #fi
-    #read -p "Enter the desired full subdomain for this client:" clientSubDomain
+    read -p "Enter the desired full subdomain for this client:" clientSubDomain
 
     if ! grep -i $DOMAIN /etc/hosts; then #fix hosts file to have domain before joining
         if grep $(hostname -s) /etc/hosts; then
             grep $(hostname -s) /etc/hosts
             echo -e "Modifying..."
-            sed -Ei "s/($(hostname -s))/\1.${DOMAIN,,} \1/g" /etc/hosts
+            sed -Ei "s/($(hostname -s))/\1.${clientSubDomain:-${DOMAIN,,}} \1/g" /etc/hosts
             grep $(hostname -s) /etc/hosts
         elif ! grep "127.0.1.1" /etc/hosts; then
-            echo -e "127.0.1.1         $(hostname -s).${DOMAIN,,} $(hostname -s)" >>/etc/hosts
+            echo -e "127.0.1.1         $(hostname -s).${clientSubDomain:-${DOMAIN,,}} $(hostname -s)" >>/etc/hosts
             grep "127.0.1.1" /etc/hosts
         fi
     fi
@@ -1013,8 +1013,8 @@ idmap config *:range = 85000-86000\n"
         printf "${sambaConf}" >>/etc/samba/smb.conf
     else
         mkdir -p /etc/samba/conf.d
-        mv /etc/samba/bmd.conf /etc/samba/bmd.conf.bak
-        printf "${sambaConf}" >>/etc/samba/conf.d/ADJoinScript.conf
+        mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
+        printf "${sambaConf}" >/etc/samba/smd.conf
     fi
 
     echo -e "${COL_CYAN}Please type group name in AD for admins${END}"
