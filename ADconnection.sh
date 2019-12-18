@@ -1013,6 +1013,7 @@ idmap config *:range = 85000-86000\n"
         printf "${sambaConf}" >>/etc/samba/smb.conf
     else
         mkdir -p /etc/samba/conf.d
+        mv /etc/samba/bmd.conf /etc/samba/bmd.conf.bak
         printf "${sambaConf}" >>/etc/samba/conf.d/ADJoinScript.conf
     fi
 
