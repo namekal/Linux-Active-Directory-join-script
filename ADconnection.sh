@@ -433,16 +433,10 @@ fi_auth_new() {
     sudo sed -Ei "s/(sudoers:)\s*(files) (sss)/\1        files/g" /etc/nsswitch.conf
     sudo echo -e "override_homedir = /home/%d/%u" | sudo tee -a /etc/sssd/sssd.conf
     sudo grep -i override /etc/sssd/sssd.conf
-    sudo echo -e "[nss]
-    filter_groups = root
-    filter_users = root
-    reconnection_retries = 3
-    entry_cache_timeout = 600
-    #entry_cache_user_timeout = 5400
-    #entry_cache_group_timeout = 5400
-    #cache_credentials = TRUE
-    entry_cache_nowait_percentage = 75" | sudo tee -a /etc/sssd/sssd.conf
-
+#    sudo echo -e "[nss]
+#filter_groups = root
+#filter_users = root
+#reconnection_retries = 3" | sudo tee -a /etc/sssd/sssd.conf
     sudo service sssd restart
     realm discover -v "$DOMAIN"
     if ! realm discover $DOMAIN; then
@@ -455,7 +449,7 @@ fi_auth_new() {
             echo -e ""
             echo -e "${INTRO_TEXT}joined to $lastverify${END}"
             echo -e ""
-            notify-send ADconnection "Joined $lastverify "
+            #notify-send ADconnection "Joined $lastverify "
         fi
         echo -e "${INTRO_TEXT}Please reboot your machine and wait 3 min for Active Directory to sync before login${END}"
         exit
@@ -680,20 +674,6 @@ linuxclient() {
     MintOS=$(hostnamectl | grep -i Operating | awk '{print $4}') </dev/null >/dev/null 2>&1
     rasp=$(lsb_release -a | grep -i Distributor | awk '{print $3}') </dev/null >/dev/null 2>&1
     kalilinux=$(lsb_release -a | grep -i Distributor | awk '{print $3}') </dev/null >/dev/null 2>&1
-
-    printf -v sambaConf "[global]\n\
-workgroup = "${DOMAIN%.*}"\n\
-realm = "${DOMAIN}"\n\
-security = ads\n\
-client signing = yes\n\
-client use spnego = yes\n\
-kerberos method = secrets and keytab\n\
-obey pam restrictions = yes\n\
-protocol = SMB3\n\
-idmap config "${domainUpper%.*}" : backend  = rid\n\
-idmap config "${domainUpper%.*}" : range = 1000-999999999999\n\
-idmap config *:backend = tdb\n\
-idmap config *:range = 85000-86000\n"
 
     #### OS detection ####
     case $TheOS in
@@ -974,6 +954,8 @@ ubuntuServer() {
             esac
         fi
     fi
+    domainUpper="${DOMAIN^^}"
+    domainLower="${DOMAIN,,}"
     echo -e "${INTRO_TEXT}Realm: ${DOMAIN}${END}"
     echo -e "${NORMAL}${NORMAL}"
     echo -e "${INTRO_TEXT}Please type a Domain Admin user:${END}"
@@ -987,58 +969,81 @@ ubuntuServer() {
         if grep $(hostname -s) /etc/hosts; then
             grep $(hostname -s) /etc/hosts
             echo -e "Modifying..."
-            sed -Ei "s/($(hostname -s))/\1.${DOMAIN,,} \1/g" /etc/hosts
+            sed -Ei "s/($(hostname -s))/\1.${domainLower} \1/g" /etc/hosts
             grep $(hostname -s) /etc/hosts
         elif ! grep "127.0.1.1" /etc/hosts; then
-            echo -e "127.0.1.1         $(hostname -s).${clientSubDomain:-${DOMAIN,,}} $(hostname -s)" >>/etc/hosts
+            echo -e "127.0.1.1         $(hostname -s).${clientSubDomain:-${domainLower}} $(hostname -s)" >>/etc/hosts
             grep "127.0.1.1" /etc/hosts
         fi
     fi
-    domainUpper="${DOMAIN^^}"
     if [ ! -f /etc/samba/smb.conf ]; then
         printf -v sambaConf "[global]\n\
 workgroup = \"${DOMAIN%.*}\"\n\
 realm = \"${DOMAIN}\"\n\
+server string = %h server\n\
 security = ads\n\
 client signing = yes\n\
 client use spnego = yes\n\
 kerberos method = secrets and keytab\n\
 obey pam restrictions = yes\n\
-protocol = SMB3\n\
-idmap config \"${domainUpper%.*}\" : backend  = rid\n\
-idmap config \"${domainUpper%.*}\" : range = 1000-999999999999\n\
-idmap config *:backend = tdb\n\
-idmap config *:range = 85000-86000\n"
+client min protocol = SMB2\n\
+usershare path = \n"
 
-        printf "${sambaConf}" >>/etc/samba/smb.conf
+        printf "${sambaConf}" >/etc/samba/smb.conf
     else
-        mkdir -p /etc/samba/conf.d
-        mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
+        sudo mkdir -p /etc/samba/conf.d
+        sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
         printf "${sambaConf}" >/etc/samba/smb.conf
     fi
 
     echo -e "${COL_CYAN}Please type group name in AD for admins${END}"
-    echo -e "${NUMBER}Be sure to escape out all whitespaces, if applicable.${END}"
+    echo -e "${COL_YELLOW}Be sure to escape out all whitespaces, if applicable.${END}"
     read -r "Mysrvgroup"
     export Mysrvgroup
 
     kinit $DomainADMIN
-    echo -e "[sssd]
-services = nss, pam, pac, ssh
-config_file_version = 2
-domains = ${DOMAIN^^}
+    printf -v sssdConf "[sssd]\n\
+services = nss, pam, pac, ssh\n\
+config_file_version = 2\n\
+domains = \"${domainUpper}\"\n\
+\n\
+[domain/\"${domainUpper}\"]\n\
+id_provider = ad\n\
+access_provider = ad\n\
+auth_provider = ad\n\
+chpass_provider = ad\n\
+ldap_idmap_autorid_compat = True\n\
+enumerate = True\n\
+use_fully_qualified_names = False\n\
+ad_server = \"${domainLower}\"\n\
+ad_hostname = \"$(hostname -f)\"\n\
+ad_domain = \"${domainLower}\"\n\
+dyndns_auth = none\n\
+#debug_level = 8\n\
+ldap_idmap_range_min = 20000\n\
+\n\
+[nss]\n\
+filter_groups = root\n\
+filter_users = root\n\
+reconnection_retries = 3\n"
 
-[domain/${DOMAIN^^}]
-id_provider = ad
-access_provider = ad
-auth_provider = ad
-chpass_provider = ad
-ldap_idmap_autorid_compat = True
-enumerate = True
-use_fully_qualified_names = False
-ldap_idmap_range_min = 20000" >/etc/sssd/sssd.conf
+        #    echo -e "[sssd]
+        #services = nss, pam, pac, ssh
+        #config_file_version = 2
+        #domains = ${domainUpper}
+        #
+        #[domain/${domainUpper}]
+        #id_provider = ad
+        #access_provider = ad
+        #auth_provider = ad
+        #chpass_provider = ad
+        #ldap_idmap_autorid_compat = True
+        #enumerate = True
+        #use_fully_qualified_names = False
+        #ldap_idmap_range_min = 20000" 
+        printf "${sssdConf}" >/etc/sssd/sssd.conf
 
-    chmod 0600 /etc/sssd/sssd.conf
+    sudo chmod 0600 /etc/sssd/sssd.conf
 
     if ! sudo net ads join -k; then
         #if ! sudo realm join -v -U "$DomainADMIN" "$DOMAIN" --install=/; then
