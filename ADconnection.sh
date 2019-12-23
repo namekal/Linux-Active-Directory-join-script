@@ -976,8 +976,7 @@ ubuntuServer() {
             grep "127.0.1.1" /etc/hosts
         fi
     fi
-    if [ ! -f /etc/samba/smb.conf ] && [ -s /etc/samba/smb.conf ]; then
-        printf -v sambaConf "[global]\n\
+           printf -v sambaConf "[global]\n\
 workgroup = ${DOMAIN%.*}\n\
 realm = ${DOMAIN}\n\
 server string = %h server\n\
@@ -988,10 +987,11 @@ kerberos method = secrets and keytab\n\
 obey pam restrictions = yes\n\
 client min protocol = SMB2\n\
 usershare path = \n"
-
-        printf "${sambaConf}" >/etc/samba/smb.conf
-    else
+    if [ ! -f /etc/samba/smb.conf ]; then
+         printf "${sambaConf}" >/etc/samba/smb.conf
+    else if [ -s /etc/samba/smb.conf ]; then
         #sudo mkdir -p /etc/samba/conf.d
+        echo -e "${COL_YELLOW}Existing Samba config found, backing up original before writing new config.${END}"
         sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
         printf "${sambaConf}" >/etc/samba/smb.conf
     fi
