@@ -324,7 +324,8 @@ fi_auth_new() {
     echo -e ""
     echo -e "-------------------------------------------------------------------------------------------"
     echo -e ""
-    read -r -p "${RED_TEXT}Do you wish to give users on this machine sudo rights?${END}${NUMBER}(y/n)?${END}" yn
+    echo -e "${RED_TEXT}Do you wish to give users on this machine sudo rights?${NUMBER}(y/n)?${END}"
+    read -r yn
     case $yn in
     [Yy]*)
         echo -e "Checking if there is any previous configuration"
@@ -333,7 +334,8 @@ fi_auth_new() {
             echo -e "Sudoers file seems already to be modified, skipping..."
             echo -e ""
         else
-            read -r -p "${RED_TEXT}Do you wish to DISABLE password prompt for users in terminal?${END}${NUMBER}(y/n)?${END}" yn
+            echo -e "${RED_TEXT}Do you wish to DISABLE password prompt for users in terminal?${END}${NUMBER}(y/n)?${END}"
+            read -r yn
             case $yn in
             [Yy]*)
                 sudo echo -e "administrator ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/sudoers
@@ -915,6 +917,7 @@ ubuntuServer() {
     echo -e "${RED_TEXT}Installing packages do not abort!.......${END}"
     sudo apt-get update -qq
     sudo apt-get install -y \
+    samba-common-bin \
     krb5-user krb5-config \
     sssd sssd-tools libpam-sss \
     libnss-sss libsss-sudo \
