@@ -433,10 +433,10 @@ fi_auth_new() {
     sudo sed -Ei "s/(sudoers:)\s*(files) (sss)/\1        files/g" /etc/nsswitch.conf
     sudo echo -e "override_homedir = /home/%d/%u" | sudo tee -a /etc/sssd/sssd.conf
     sudo grep -i override /etc/sssd/sssd.conf
-#    sudo echo -e "[nss]
-#filter_groups = root
-#filter_users = root
-#reconnection_retries = 3" | sudo tee -a /etc/sssd/sssd.conf
+    #    sudo echo -e "[nss]
+    #filter_groups = root
+    #filter_users = root
+    #reconnection_retries = 3" | sudo tee -a /etc/sssd/sssd.conf
     sudo service sssd restart
     realm discover -v "$DOMAIN"
     if ! realm discover $DOMAIN; then
@@ -976,10 +976,10 @@ ubuntuServer() {
             grep "127.0.1.1" /etc/hosts
         fi
     fi
-           printf -v sambaConf "[global]\n\
+    printf "[global]\n\
 workgroup = ${DOMAIN%.*}\n\
 realm = ${DOMAIN}\n\
-server string = %h server\n\
+server string = %%h server\n\
 security = ads\n\
 client signing = yes\n\
 client use spnego = yes\n\
@@ -988,12 +988,14 @@ obey pam restrictions = yes\n\
 client min protocol = SMB2\n\
 usershare path = \n"
     if [ ! -f /etc/samba/smb.conf ]; then
-         printf "${sambaConf}" >/etc/samba/smb.conf
-    else if [ -s /etc/samba/smb.conf ]; then
-        #sudo mkdir -p /etc/samba/conf.d
-        echo -e "${COL_YELLOW}Existing Samba config found, backing up original before writing new config.${END}"
-        sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
         printf "${sambaConf}" >/etc/samba/smb.conf
+    else
+        if [ -s "/etc/samba/smb.conf" ]; then
+            #sudo mkdir -p /etc/samba/conf.d
+            echo -e "${COL_YELLOW}Existing Samba config found, backing up original before writing new config.${END}"
+            sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
+            printf "${sambaConf}" >/etc/samba/smb.conf
+        fi
     fi
 
     echo -e "${COL_CYAN}Please type group name in AD for admins${END}"
@@ -1027,21 +1029,21 @@ filter_groups = root\n\
 filter_users = root\n\
 reconnection_retries = 3\n"
 
-        #    echo -e "[sssd]
-        #services = nss, pam, pac, ssh
-        #config_file_version = 2
-        #domains = ${domainUpper}
-        #
-        #[domain/${domainUpper}]
-        #id_provider = ad
-        #access_provider = ad
-        #auth_provider = ad
-        #chpass_provider = ad
-        #ldap_idmap_autorid_compat = True
-        #enumerate = True
-        #use_fully_qualified_names = False
-        #ldap_idmap_range_min = 20000" 
-        printf "${sssdConf}" >/etc/sssd/sssd.conf
+    #    echo -e "[sssd]
+    #services = nss, pam, pac, ssh
+    #config_file_version = 2
+    #domains = ${domainUpper}
+    #
+    #[domain/${domainUpper}]
+    #id_provider = ad
+    #access_provider = ad
+    #auth_provider = ad
+    #chpass_provider = ad
+    #ldap_idmap_autorid_compat = True
+    #enumerate = True
+    #use_fully_qualified_names = False
+    #ldap_idmap_range_min = 20000"
+    printf "${sssdConf}" >/etc/sssd/sssd.conf
 
     sudo chmod 0600 /etc/sssd/sssd.conf
 
@@ -1054,7 +1056,6 @@ reconnection_retries = 3\n"
         #fi
     fi
     fi_auth_new
-
 }
 
 ####################################### Kali ############################################
