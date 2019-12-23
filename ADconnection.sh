@@ -976,7 +976,7 @@ ubuntuServer() {
             grep "127.0.1.1" /etc/hosts
         fi
     fi
-    if [ ! -f /etc/samba/smb.conf ]; then
+    if [ ! -f /etc/samba/smb.conf ] && [ -s /etc/samba/smb.conf ]; then
         printf -v sambaConf "[global]\n\
 workgroup = ${DOMAIN%.*}\n\
 realm = ${DOMAIN}\n\
