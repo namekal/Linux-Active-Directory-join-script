@@ -19,7 +19,7 @@
 
 # ~~~~~~~~~~  Environment Setup ~~~~~~~~~~ #
 err() {
-    echo -e -e "${COL_YELLOW}[$(date +'%Y-%m-%dT%H:%M:%S%z')] ${UNDERLINE}${COL_RED}ERR${COL_RESET}:  $@" >&2
+    echo -e "${COL_YELLOW}[$(date +'%Y-%m-%dT%H:%M:%S%z')] ${UNDERLINE}${COL_RED}ERR${COL_RESET}:  $@" >&2
 }
 
 # Colors
@@ -278,7 +278,8 @@ fi_auth_new() {
     therealm="null"
     cauth="null"
     #clear
-    read -r -p "${RED_TEXT}Do you wish to enable SSH login.group.allowed${END}${NUMBER}(y/n)?${END}" yn
+    echo -e "${RED_TEXT}Do you wish to enable SSH login.group.allowed${NUMBER}(y/n)?${END}"
+    read -r yn
     case $yn in
     [Yy]*)
         echo -e "Checking if there is any previous configuration"
@@ -907,7 +908,7 @@ ubuntuDesktop() {
 ####################### Setup for Ubuntu server #######################################
 ubuntuServer() {
     export HOSTNAME
-    set -x
+    #set -x
     myhost=$(hostname | cut -d '.' -f1)
     dhcpDomain=$(hostname -d)
 
