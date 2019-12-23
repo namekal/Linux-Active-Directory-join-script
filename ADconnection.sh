@@ -987,10 +987,10 @@ kerberos method = secrets and keytab\n\
 obey pam restrictions = yes\n\
 client min protocol = SMB2\n\
 usershare path = \n"
-    if [ ! -f /etc/samba/smb.conf ]; then
+    if [ ! -f /etc/samba/smb.conf ] || [ -s /etc/samba/smb.conf ]; then
         printf "${sambaConf}" >/etc/samba/smb.conf
     else
-        if [ -s "/etc/samba/smb.conf" ]; then
+        if [ ! -s /etc/samba/smb.conf ]; then
             #sudo mkdir -p /etc/samba/conf.d
             echo -e "${COL_YELLOW}Existing Samba config found, backing up original before writing new config.${END}"
             sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
