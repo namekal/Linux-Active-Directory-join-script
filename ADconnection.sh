@@ -976,7 +976,7 @@ ubuntuServer() {
             grep "127.0.1.1" /etc/hosts
         fi
     fi
-    printf "[global]\n\
+    printf -v sambaConf "[global]\n\
 workgroup = ${DOMAIN%.*}\n\
 realm = ${DOMAIN}\n\
 server string = %%h server\n\
@@ -1021,7 +1021,7 @@ ad_server = ${domainLower}\n\
 ad_hostname = $(hostname -f)\n\
 ad_domain = ${domainLower}\n\
 dyndns_auth = none\n\
-#debug_level = 8\n\
+debug_level = 8\n\
 ldap_idmap_range_min = 20000\n\
 \n\
 [nss]\n\
