@@ -979,7 +979,7 @@ ubuntuServer() {
     printf -v sambaConf "[global]\n\
 workgroup = ${DOMAIN%.*}\n\
 realm = ${DOMAIN}\n\
-server string = %%h server\n\
+server string = %%%%h server\n\
 security = ads\n\
 client signing = yes\n\
 client use spnego = yes\n\
