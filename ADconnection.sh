@@ -933,7 +933,7 @@ ubuntuServer() {
         DOMAIN=$(realm discover $dhcpDomain | grep -i realm-name | awk '{print $2}')
     fi
     if ! ping -c 1 "$DOMAIN"; then
-        DOMAIN=$(realm discover -v $(cat /etc/resolv.conf | grep -i ^search | sed -r 's/search //') | grep -i realm-name | awk '{print $2}')
+        DOMAIN=$(realm discover -v $(cat /etc/resolv.conf | grep -i ^search | sed -Er "s/search |$dhcpDomain//g") | grep -i realm-name | awk '{print $2}')
         if ! ping -c 1 "$DOMAIN"; then
             #clear
             echo -e "${NUMBER}I searched for an available domain and found nothing, please type your domain manually below... ${END}"
@@ -978,8 +978,8 @@ ubuntuServer() {
     fi
     if [ ! -f /etc/samba/smb.conf ]; then
         printf -v sambaConf "[global]\n\
-workgroup = \"${DOMAIN%.*}\"\n\
-realm = \"${DOMAIN}\"\n\
+workgroup = ${DOMAIN%.*}\n\
+realm = ${DOMAIN}\n\
 server string = %h server\n\
 security = ads\n\
 client signing = yes\n\
@@ -991,7 +991,7 @@ usershare path = \n"
 
         printf "${sambaConf}" >/etc/samba/smb.conf
     else
-        sudo mkdir -p /etc/samba/conf.d
+        #sudo mkdir -p /etc/samba/conf.d
         sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
         printf "${sambaConf}" >/etc/samba/smb.conf
     fi
@@ -1005,9 +1005,9 @@ usershare path = \n"
     printf -v sssdConf "[sssd]\n\
 services = nss, pam, pac, ssh\n\
 config_file_version = 2\n\
-domains = \"${domainUpper}\"\n\
+domains = ${domainUpper}\n\
 \n\
-[domain/\"${domainUpper}\"]\n\
+[domain/${domainUpper}]\n\
 id_provider = ad\n\
 access_provider = ad\n\
 auth_provider = ad\n\
@@ -1015,9 +1015,9 @@ chpass_provider = ad\n\
 ldap_idmap_autorid_compat = True\n\
 enumerate = True\n\
 use_fully_qualified_names = False\n\
-ad_server = \"${domainLower}\"\n\
-ad_hostname = \"$(hostname -f)\"\n\
-ad_domain = \"${domainLower}\"\n\
+ad_server = ${domainLower}\n\
+ad_hostname = $(hostname -f)\n\
+ad_domain = ${domainLower}\n\
 dyndns_auth = none\n\
 #debug_level = 8\n\
 ldap_idmap_range_min = 20000\n\
