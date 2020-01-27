@@ -1,0 +1,20 @@
+## SSSD Config
+##############
+
+SSSD_DOMAIN_CAP=${domainUpper}
+SSSD_AD_SERVER=${domainLower}
+SSSD_AD_DOMAIN=${domainLower}
+SSSD_AD_HOSTNAME=$(hostname -f)
+
+
+## LDAP Config
+##############
+
+LDAP_BASEDN='dc=example,dc=com'
+LDAP_SERVER=ad.example.com
+
+
+SAMBA_WORKGROUP=EVOLVED
+SAMBA_REALM=EVOLVED.SITE
+SAMBA_DOMAIN_SHORT=EVOLVED
+SAMBA_BIND_INTERFACES=10.0.0.0/20

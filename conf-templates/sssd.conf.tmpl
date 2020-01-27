@@ -1,0 +1,24 @@
+[sssd]
+services = nss, pam, pac, ssh
+config_file_version = 2
+domains = %SSSD_DOMAIN_CAP%
+
+[domain/%SSSD_DOMAIN_CAP%]
+id_provider = ad
+access_provider = ad
+auth_provider = ad
+chpass_provider = ad
+ldap_idmap_autorid_compat = True
+enumerate = True
+use_fully_qualified_names = False
+ad_server = %SSSD_AD_SERVER%
+ad_hostname = %SSSD_AD_HOSTNAME% 
+ad_domain = %SSSD_AD_DOMAIN 
+dyndns_auth = none
+debug_level = 8
+ldap_idmap_range_min = 20000
+
+[nss]
+filter_groups = root
+filter_users = root
+reconnection_retries = 3
